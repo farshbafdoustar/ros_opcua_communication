@@ -50,6 +50,7 @@ def nextname(hierachy, index_of_last_processed):
 
 
 class ROSServer:
+    
     def __init__(self):
         self.namespace_ros = rospy.get_param("/rosopcua/namespace")
         self.topicsDict = {}
@@ -62,6 +63,8 @@ class ROSServer:
         self.server.start()
 
         self.method_map = None
+        self.INPUT_TOPIC="INPUT"
+        self.OUTPUT_TOPIC="OUTPUT"
 
         # setup our own namespaces, this is expected
         uri_topics = "http://ros.org/topics"
@@ -96,11 +99,15 @@ class ROSServer:
 
         sub_lst = []
         for key in self.method_map:
+            for topic_name, topic_type,io_type in all_topics_lst:
+                if io_type==self.OUTPUT_TOPIC and topic_name in key:
+                    leaf_node = self.client.get_node(key)
+                    sub_lst.append(leaf_node)
+
             # if(key.find("/header") != -1 or key.find("time") != -1):
             #     del self.method_map[key]
             #     continue
-            leaf_node = self.client.get_node(key)
-            sub_lst.append(leaf_node)
+            
             
         try:
             
@@ -109,7 +116,7 @@ class ROSServer:
         except:
             print("Can not create_subscription for this object:",key)
             
-            #rospy.logdebug(sub_lst)
+            #print(sub_lst)
 
         #print(self.method_map)
         print("ROS OPCUA Server initialized.")
@@ -126,22 +133,21 @@ class ROSServer:
 
     def get_all_topics(self):
         # function to provide topics
-        INPUT_TOPIC="INPUT"
-        OUTPUT_TOPIC="OUTPUT"
+       
         all_ros_topics = []
-        all_ros_topics.append(['/teststation/controller/activate_cutter/command', 'std_msgs/Bool',OUTPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/activate_thread_clamp/command', 'std_msgs/Bool',OUTPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/open_head/command', 'std_msgs/Bool',OUTPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/unlock_tool_changer/command', 'std_msgs/Bool',OUTPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/activate_cutter/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/activate_thread_clamp/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/open_head/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/unlock_tool_changer/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
 
-        all_ros_topics.append(['/teststation/controller/is_cutter_activated/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_cutter_deactivated/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_head_close/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_head_open/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_needle_cutting/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_needle_top/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_toolchanger_locked/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_toolchanger_unlocked/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/is_cutter_activated/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_cutter_deactivated/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_head_close/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_head_open/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_needle_cutting/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_needle_top/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_toolchanger_locked/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_toolchanger_unlocked/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
 
         return all_ros_topics
 
@@ -154,32 +160,33 @@ class ROSServer:
         node.call_method(method)
 
     # def find_service_node_with_same_name(self, name, idx):
-    #     rospy.logdebug("Reached ServiceCheck for name " + name)
+    #     print("Reached ServiceCheck for name " + name)
     #     for service in self.servicesDict:
-    #         rospy.logdebug(
+    #         print(
     #             "Found name: " + str(self.servicesDict[service].parent.nodeid.Identifier))
     #         if self.servicesDict[service].parent.nodeid.Identifier == name:
-    #             rospy.logdebug("Found match for name: " + name)
+    #             print("Found match for name: " + name)
     #             return self.servicesDict[service].parent
     #     return None
 
     def find_topics_node_with_same_name(self, name, idx):
-        rospy.logdebug("Reached TopicCheck for name " + name)
+        
+        print("Reached TopicCheck for name " + name)
         for topic in self.topicsDict:
-            rospy.logdebug(
+            print(
                 "Found name: " + str(self.topicsDict[topic].parent.nodeid.Identifier))
             if self.topicsDict[topic].parent.nodeid.Identifier == name:
-                rospy.logdebug("Found match for name: " + name)
+                print("Found match for name: " + name)
                 return self.topicsDict[topic].parent
         return None
 
     def find_action_node_with_same_name(self, name, idx):
-        rospy.logdebug("Reached ActionCheck for name " + name)
+        print("Reached ActionCheck for name " + name)
         for topic in self.actionsDict:
-            rospy.logdebug(
+            print(
                 "Found name: " + str(self.actionsDict[topic].parent.nodeid.Identifier))
             if self.actionsDict[topic].parent.nodeid.Identifier == name:
-                rospy.logdebug("Found match for name: " + name)
+                print("Found match for name: " + name)
                 return self.actionsDict[topic].parent
         return None
 
