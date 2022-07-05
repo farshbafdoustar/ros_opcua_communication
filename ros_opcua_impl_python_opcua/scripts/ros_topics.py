@@ -28,11 +28,13 @@ from control_msgs.msg import *
 
 
 class OpcUaROSTopic:
-    def __init__(self, server, parent, idx, topic_name, topic_type):
-
+    def __init__(self, server, parent, idx, topic_name, topic_type,io_type):
+        INPUT_TOPIC="INPUT"
+        OUTPUT_TOPIC="OUTPUT"
         self.server = server
         self.parent = self.recursive_create_objects(topic_name, idx, parent)
         self.type_name = topic_type
+        self.io_type = io_type
         self.name = topic_name
         self._nodes = {}
         self.idx = idx
@@ -51,11 +53,17 @@ class OpcUaROSTopic:
         
 
         self._recursive_create_items(self.parent, idx, topic_name, topic_type, self.message_instance, True)
-
-        self._subscriber = rospy.Subscriber(self.name, self.message_class, self.message_callback)
-        self._publisher = rospy.Publisher(self.name, self.message_class, queue_size=1)
+        if io_type==INPUT_TOPIC:
+            self._subscriber = rospy.Subscriber(self.name, self.message_class, self.message_callback)
+            rospy.loginfo("Created ROS INPUT Topic with name: " + str(self.name))
+        else:
+            if io_type==OUTPUT_TOPIC:
+                self._publisher = rospy.Publisher(self.name, self.message_class, queue_size=1)
+                rospy.loginfo("Created ROS OUTPUT Topic with name: " + str(self.name))
+            else:
+                rospy.loginfo("TOPIC is not Input or output: " + str(self.name))  
         
-        rospy.loginfo("Created ROS Topic with name: " + str(self.name))
+        
         # self.opcua_update_callback(self.parent)
 
         # return self.child_to_update_method_map
@@ -122,7 +130,7 @@ class OpcUaROSTopic:
 
     @uamethod
     def opcua_update_callback(self, parent):
-        print("opcua callback")
+        print("opcua object change callback -> ROS publisher is called")
         try:
             for nodeName in self._nodes:
                 child = self._nodes[nodeName]
@@ -134,9 +142,14 @@ class OpcUaROSTopic:
                     elif child.get_node_class == ua.NodeClass.Object:
                         setattr(self.message_instance, name, self.create_message_instance(child))
             self._publisher.publish(self.message_instance)
-        except rospy.ROSException as e:
+        except:
             rospy.logerr("Error when updating node " + self.name, e)
             self.server.server.delete_nodes([self.parent])
+        finally:
+            print("ros message:",name)
+            print("opcua object change callback finished.")
+             
+
 
 
     def update_value(self, topic_name, message):#it does enter this func   
@@ -345,7 +358,7 @@ def refresh_topics_and_actions(namespace_ros, server, topicsdict, actionsdict, i
 
     rospy.logdebug(str(ros_topics))
     rospy.logdebug(str(rospy.get_published_topics('/move_base_simple')))
-    for topic_name, topic_type in ros_topics:
+    for topic_name, topic_type,io_type in ros_topics:
         if topic_name not in topicsdict or topicsdict[topic_name] is None:
             splits = topic_name.split('/')
             if "cancel" in splits[-1] or "result" in splits[-1] or "feedback" in splits[-1] or "goal" in splits[-1] or "status" in splits[-1]:
@@ -367,7 +380,7 @@ def refresh_topics_and_actions(namespace_ros, server, topicsdict, actionsdict, i
                 pass       
             else:
                 # rospy.loginfo("Ignoring normal topics for debugging...")
-                topic = OpcUaROSTopic(server, topics, idx_topics, topic_name, topic_type)
+                topic = OpcUaROSTopic(server, topics, idx_topics, topic_name, topic_type,io_type)
                 topicsdict[topic_name] = topic
                 
                 all_child_to_method_maps = merge_two_dicts(all_child_to_method_maps, topic.child_to_update_method_map)
@@ -387,7 +400,10 @@ def refresh_topics_and_actions(namespace_ros, server, topicsdict, actionsdict, i
             if topic_nameOPC == topicROS:
                 found = True
         if not found:
+            print(topic_nameOPC)
 
+            #HERE the idea is deleting the topics from opcua that h as not publisher
+            #but actually the code has problem with server?? @Hamoon
             topicsdict[topic_nameOPC].recursive_delete_items(server.get_node(ua.NodeId(topic_nameOPC, idx_topics)))
             tobedeleted.append(topic_nameOPC)
     for name in tobedeleted:

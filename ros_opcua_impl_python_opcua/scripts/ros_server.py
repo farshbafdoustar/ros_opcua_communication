@@ -80,7 +80,7 @@ class ROSServer:
         actions_object = objects.add_object(idx_actions, "ROS_Actions")
 
         # hh
-        self.client = Client("opc.tcp://0.0.0.0:21554/")
+        self.client = Client("opc.tcp://0.0.0.0:21554/",timeout=10)
         self.client.connect()
         print("client conected")
 
@@ -96,37 +96,52 @@ class ROSServer:
 
         sub_lst = []
         for key in self.method_map:
-            if(key.find("/header") != -1 or key.find("time") != -1):
-                del self.method_map[key]
-                continue
+            # if(key.find("/header") != -1 or key.find("time") != -1):
+            #     del self.method_map[key]
+            #     continue
             leaf_node = self.client.get_node(key)
-            sub = self.client.create_subscription(100, self)
-            handle = sub.subscribe_data_change(leaf_node)
-            sub_lst.append(sub)
-            rospy.logdebug(sub_lst)
+            sub_lst.append(leaf_node)
+            
+        try:
+            
+            sub = self.client.create_subscription(1, self)
+            handle = sub.subscribe_data_change(sub_lst)
+        except:
+            print("Can not create_subscription for this object:",key)
+            
+            #rospy.logdebug(sub_lst)
 
-        print(self.method_map)
-        time.sleep(0)  # used to be 60
+        #print(self.method_map)
+        print("ROS OPCUA Server initialized.")
+        while not rospy.is_shutdown():
+            rospy.spin()
+       
+        #time.sleep(0)  # used to be 60
 
-        # self.server.stop()
-        # quit()
+        self.server.stop()
+        print("ROS OPCUA Server stopped.")
+        quit()
+        
+        
 
     def get_all_topics(self):
         # function to provide topics
+        INPUT_TOPIC="INPUT"
+        OUTPUT_TOPIC="OUTPUT"
         all_ros_topics = []
-        all_ros_topics.append(['/teststation/controller/activate_cutter/command', 'std_msgs/Bool'])
-        all_ros_topics.append(['/teststation/controller/activate_thread_clamp/command', 'std_msgs/Bool'])
-        all_ros_topics.append(['/teststation/controller/open_head/command', 'std_msgs/Bool'])
-        all_ros_topics.append(['/teststation/controller/unlock_tool_changer/command', 'std_msgs/Bool'])
+        all_ros_topics.append(['/teststation/controller/activate_cutter/command', 'std_msgs/Bool',OUTPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/activate_thread_clamp/command', 'std_msgs/Bool',OUTPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/open_head/command', 'std_msgs/Bool',OUTPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/unlock_tool_changer/command', 'std_msgs/Bool',OUTPUT_TOPIC])
 
-        all_ros_topics.append(['/teststation/controller/is_cutter_activated/state', 'std_msgs/ByteMultiArray'])
-        #all_ros_topics.append(['/teststation/controller/is_cutter_deactivated/state', 'std_msgs/ByteMultiArray'])
-        #all_ros_topics.append(['/teststation/controller/is_head_close/state', 'std_msgs/ByteMultiArray'])
-        #all_ros_topics.append(['/teststation/controller/is_head_open/state', 'std_msgs/ByteMultiArray'])
-        #all_ros_topics.append(['/teststation/controller/is_needle_cutting/state', 'std_msgs/ByteMultiArray'])
-        # all_ros_topics.append(['/teststation/controller/is_needle_top/state', 'std_msgs/ByteMultiArray'])
-        # all_ros_topics.append(['/teststation/controller/is_toolchanger_locked/state', 'std_msgs/ByteMultiArray'])
-        # all_ros_topics.append(['/teststation/controller/is_toolchanger_unlocked/state', 'std_msgs/ByteMultiArray'])
+        all_ros_topics.append(['/teststation/controller/is_cutter_activated/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_cutter_deactivated/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_head_close/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_head_open/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_needle_cutting/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_needle_top/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_toolchanger_locked/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/is_toolchanger_unlocked/state', 'std_msgs/ByteMultiArray',INPUT_TOPIC])
 
         return all_ros_topics
 
