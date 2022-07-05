@@ -37,13 +37,13 @@ class ROSClient:
             print("errorrrrr")
         print("Client is connected to server!!!!!")
 
-    def subscribe(self):
-        node_str = 'ns=2;s=/teststation/controller/activate_cutter/command'
-        node = self.client.get_node(node_str)
-        handler = SubHandler()
-        self.sub = self.client.create_subscription(1, handler)
-        self.sub.subscribe_data_change(node)
-        print("subscribed")
+    # def subscribe(self):
+    #     node_str = 'ns=2;s=/teststation/controller/activate_cutter/command'
+    #     node = self.client.get_node(node_str)
+    #     handler = SubHandler()
+    #     self.sub = self.client.create_subscription(1, handler)
+    #     self.sub.subscribe_data_change(node)
+    #     print("subscribed")
 
 
 # def main(args):

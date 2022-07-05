@@ -55,9 +55,11 @@ class OpcUaROSTopic:
         self._recursive_create_items(self.parent, idx, topic_name, topic_type, self.message_instance, True)
         if io_type==INPUT_TOPIC:
             self._subscriber = rospy.Subscriber(self.name, self.message_class, self.message_callback)
+            self._publisher=None
             rospy.loginfo("Created ROS INPUT Topic with name: " + str(self.name))
         else:
             if io_type==OUTPUT_TOPIC:
+                self._subscriber=None
                 self._publisher = rospy.Publisher(self.name, self.message_class, queue_size=1)
                 rospy.loginfo("Created ROS OUTPUT Topic with name: " + str(self.name))
             else:
@@ -131,28 +133,35 @@ class OpcUaROSTopic:
     @uamethod
     def opcua_update_callback(self, parent):
         print("opcua object change callback -> ROS publisher is called")
-        try:
-            for nodeName in self._nodes:
-                child = self._nodes[nodeName]
-                name = child.get_display_name().Text
-                if hasattr(self.message_instance, name):
-                    if child.get_node_class() == ua.NodeClass.Variable:
-                        setattr(self.message_instance, name,
-                                correct_type(child, type(getattr(self.message_instance, name))))
-                    elif child.get_node_class == ua.NodeClass.Object:
-                        setattr(self.message_instance, name, self.create_message_instance(child))
-            self._publisher.publish(self.message_instance)
-        except:
-            rospy.logerr("Error when updating node " + self.name, e)
-            self.server.server.delete_nodes([self.parent])
-        finally:
-            print("ros message:",name)
-            print("opcua object change callback finished.")
+        if self._publisher is not None:
+            try:
+                for nodeName in self._nodes:
+                    child = self._nodes[nodeName]
+                    name = child.get_display_name().Text
+                    print ("changed attribute:",name)
+                    if hasattr(self.message_instance, name):
+                        if child.get_node_class() == ua.NodeClass.Variable:
+                            setattr(self.message_instance, name,
+                                    correct_type(child, type(getattr(self.message_instance, name))))
+                        elif child.get_node_class == ua.NodeClass.Object:
+                            setattr(self.message_instance, name, self.create_message_instance(child))
+                print("ros message:",self.name,self.message_instance)
+                self._publisher.publish(self.message_instance)
+               
+
+            except:
+                rospy.logerr("Error when updating node " + self.name, e)
+                self.server.server.delete_nodes([self.parent])
+        else:
+            print("opcua object chnage but no publisher available for:",self.name,self.message_instance)
+               
+        print("opcua object change callback finished.")
              
 
 
 
-    def update_value(self, topic_name, message):#it does enter this func   
+    def update_value(self, topic_name, message):#it does enter this func  
+        #print("ROS subscriber call back called for message: ",self.name)
         if hasattr(message, '__slots__') and hasattr(message, '_slot_types'):
             for slot_name in message.__slots__:
                 self.update_value(topic_name + '/' + slot_name, getattr(message, slot_name))
