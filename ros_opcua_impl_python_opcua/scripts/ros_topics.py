@@ -161,13 +161,12 @@ class OpcUaROSTopic:
 
 
     def update_value(self, topic_name, message):#it does enter this func  
-        #print("ROS subscriber call back called for message: ",self.name)
+        # print("ROS subscriber call back called for message: ",self.name)
         if hasattr(message, '__slots__') and hasattr(message, '_slot_types'):
             for slot_name in message.__slots__:
                 self.update_value(topic_name + '/' + slot_name, getattr(message, slot_name))
 
         elif type(message) in (list, tuple):
-
             if (len(message) > 0) and hasattr(message[0], '__slots__'):
                 for index, slot in enumerate(message):
                     if topic_name + '[%d]' % index in self._nodes:
@@ -187,6 +186,7 @@ class OpcUaROSTopic:
                         self.recursive_delete_items(self._nodes[item_topic_name])
                         del self._nodes[item_topic_name]
         else:
+            print(topic_name)
             if topic_name in self._nodes and self._nodes[topic_name] is not None:
                 self._nodes[topic_name].set_value(repr(message))
 
