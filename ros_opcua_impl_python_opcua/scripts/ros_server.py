@@ -17,9 +17,6 @@ import ros_services
 import ros_topics
 
 
-# import ros_client
-from opcua import Client
-
 from std_msgs.msg import *
 from control_msgs.msg import *
 from trajectory_msgs import *
@@ -83,9 +80,9 @@ class ROSServer:
         actions_object = objects.add_object(idx_actions, "ROS_Actions")
 
         # hh
-        self.client = Client("opc.tcp://0.0.0.0:21554/",timeout=10)
-        self.client.connect()
-        print("client conected")
+        # self.client = Client("opc.tcp://0.0.0.0:21554/",timeout=10)
+        # self.client.connect()
+        # print("client conected")
 
         # while not rospy.is_shutdown():
 
@@ -101,7 +98,7 @@ class ROSServer:
         for key in self.method_map:
             for topic_name, topic_type,io_type in all_topics_lst:
                 if io_type==self.OUTPUT_TOPIC and topic_name in key:
-                    leaf_node = self.client.get_node(key)
+                    leaf_node = self.server.get_node(key)
                     sub_lst.append(leaf_node)
 
             # if(key.find("/header") != -1 or key.find("time") != -1):
@@ -111,7 +108,7 @@ class ROSServer:
             
         try:
             
-            sub = self.client.create_subscription(1, self)
+            sub = self.server.create_subscription(period=1, handler=self)
             handle = sub.subscribe_data_change(sub_lst)
         except:
             print("Can not create_subscription for this object:",key)
@@ -156,7 +153,7 @@ class ROSServer:
     def datachange_notification(self, node, val, data):
         nodeid_str = node.nodeid.to_string()
         method_str = self.method_map[nodeid_str]
-        method = self.client.get_node(method_str)
+        method = self.server.get_node(method_str)
         node.call_method(method)
 
     # def find_service_node_with_same_name(self, name, idx):
