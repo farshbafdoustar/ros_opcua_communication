@@ -14,15 +14,8 @@ from opcua import Client
 
 
 class SubHandler(object):
-    """
-    """
     def datachange_notification(self, node, val, data):
-        print("Python: New data change event", node, val)
-        print("getting parent")
         node.call_method()
-        # parent = node.get_parent()
-        # print(parent)
-        print("parent printed")
 
 
 class ROSClient:
@@ -30,12 +23,12 @@ class ROSClient:
         self.server_addr = addr
         self.client = Client(addr)  
 
-    def connect_to_server(self):
-        try:
-            self.client.connect()
-        except:
-            print("errorrrrr")
-        print("Client is connected to server!!!!!")
+    # def connect_to_server(self):
+    #     try:
+    #         self.client.connect()
+    #     except:
+    #         print("errorrrrr")
+    #     print("Client is connected to server!!!!!")
 
     # def subscribe(self):
     #     node_str = 'ns=2;s=/teststation/controller/activate_cutter/command'

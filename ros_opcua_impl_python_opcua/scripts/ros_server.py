@@ -66,17 +66,17 @@ class ROSServer:
         # setup our own namespaces, this is expected
         uri_topics = "http://ros.org/topics"
         # two different namespaces to make getting the correct node easier for get_node (otherwise had object for service and topic with same name
-        #uri_services = "http://ros.org/services"
+        uri_services = "http://ros.org/services"
         uri_actions = "http://ros.org/actions"
         idx_topics = self.server.register_namespace(uri_topics)
-        #idx_services = self.server.register_namespace(uri_services)
+        idx_services = self.server.register_namespace(uri_services)
         idx_actions = self.server.register_namespace(uri_actions)
         # get Objects node, this is where we should put our custom stuff
         objects = self.server.get_objects_node()
 
         # one object per type we are watching
         topics_object = objects.add_object(idx_topics, "ROS-Topics")
-        #services_object = objects.add_object(idx_services, "ROS-Services")
+        services_object = objects.add_object(idx_services, "ROS-Services")
         actions_object = objects.add_object(idx_actions, "ROS_Actions")
 
         # hh
@@ -89,7 +89,7 @@ class ROSServer:
         all_topics_lst = self.get_all_topics()
 
         # ros_topics starts a lot of publisher/subscribers, might slow everything down quite a bit.
-        # ros_services.refresh_services(self.namespace_ros, self, self.servicesDict, idx_services, services_object)
+        ros_services.refresh_services(self.namespace_ros, self, self.servicesDict, idx_services, services_object)
         self.method_map = ros_topics.refresh_topics_and_actions(self.namespace_ros, self, self.topicsDict, self.actionsDict,
                                                                 idx_topics, idx_actions, topics_object, actions_object, all_topics_lst)
         # hh
@@ -99,13 +99,7 @@ class ROSServer:
             for topic_name, topic_type,io_type in all_topics_lst:
                 if io_type==self.OUTPUT_TOPIC and topic_name in key:
                     leaf_node = self.server.get_node(key)
-                    sub_lst.append(leaf_node)
-
-            # if(key.find("/header") != -1 or key.find("time") != -1):
-            #     del self.method_map[key]
-            #     continue
-            
-            
+                    sub_lst.append(leaf_node)            
         try:
             
             sub = self.server.create_subscription(period=1, handler=self)
@@ -136,16 +130,83 @@ class ROSServer:
         all_ros_topics.append(['/teststation/controller/activate_thread_clamp/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
         all_ros_topics.append(['/teststation/controller/open_head/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
         all_ros_topics.append(['/teststation/controller/unlock_tool_changer/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
-
+        all_ros_topics.append(['/joint_states', 'sensor_msgs/JointState',self.INPUT_TOPIC])
         all_ros_topics.append(['/teststation/controller/is_cutter_activated/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_cutter_deactivated/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_head_close/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_head_open/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_needle_cutting/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_needle_top/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_toolchanger_locked/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_toolchanger_unlocked/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/is_cutter_deactivated/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/is_head_close/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/is_head_open/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/is_needle_cutting/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/is_needle_top/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/is_toolchanger_locked/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        all_ros_topics.append(['/teststation/controller/is_toolchanger_unlocked/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
 
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/position_trajectory_controller/state', 'control_msgs/JointTrajectoryControllerState',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/table_controller/state', 'control_msgs/JointTrajectoryControllerState',self.INPUT_TOPIC])
+
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/position_trajectory_controller/command', 'trajectory_msgs/JointTrajectory',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/table_controller/command', 'trajectory_msgs/JointTrajectory',self.INPUT_TOPIC])
+
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/camera_hw_trigger_state/world_to_tcp_transform', 'geometry_msgs/TransformStamped',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/joint_based_transform/world_to_tcp_transform', 'geometry_msgs/TransformStamped',self.INPUT_TOPIC])
+
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/analog_input_vacuum_sensors/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/camera_hw_trigger_state/states', 'io_controllers_msgs/DigitalStateCommandy',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_input_head_opening/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_input_head_thread_cutter/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_input_tool_changer_lock/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_head_air_blowing/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_head_thread_cutter/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_head_thread_tension/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_hmi_right_green_button/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_laser_left/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_laser_middle/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_laser_middle_left/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_laser_middle_right/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_laser_right/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_sewing_light/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_compressor_fast/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_compressor_medium/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_compressor_slow/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_open_sewing_head/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_1/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_2/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_3/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_4/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_5/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_6/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_7/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_8/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_9/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_10/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/camera_hw_trigger_state/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_head_air_blowing/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_head_thread_cutter/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_head_thread_tension/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_hmi_right_green_button/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_laser_left/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_laser_middle/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_laser_middle_left/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_laser_middle_right/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_laser_right/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_activate_sewing_light/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_compressor_fast/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_compressor_medium/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_compressor_slow/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_open_sewing_head/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_1/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_2/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_3/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_4/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_5/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_6/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_7/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_8/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_9/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_10/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        
+        
+        
         return all_ros_topics
 
     # cb
@@ -156,15 +217,15 @@ class ROSServer:
         method = self.server.get_node(method_str)
         node.call_method(method)
 
-    # def find_service_node_with_same_name(self, name, idx):
-    #     print("Reached ServiceCheck for name " + name)
-    #     for service in self.servicesDict:
-    #         print(
-    #             "Found name: " + str(self.servicesDict[service].parent.nodeid.Identifier))
-    #         if self.servicesDict[service].parent.nodeid.Identifier == name:
-    #             print("Found match for name: " + name)
-    #             return self.servicesDict[service].parent
-    #     return None
+    def find_service_node_with_same_name(self, name, idx):
+        print("Reached ServiceCheck for name " + name)
+        for service in self.servicesDict:
+            print(
+                "Found name: " + str(self.servicesDict[service].parent.nodeid.Identifier))
+            if self.servicesDict[service].parent.nodeid.Identifier == name:
+                print("Found match for name: " + name)
+                return self.servicesDict[service].parent
+        return None
 
     def find_topics_node_with_same_name(self, name, idx):
         
