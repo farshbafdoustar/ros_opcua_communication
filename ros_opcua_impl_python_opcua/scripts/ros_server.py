@@ -55,7 +55,7 @@ class ROSServer:
         self.actionsDict = {}
         rospy.init_node("rosopcua")
         self.server = Server()
-        self.server.set_endpoint("opc.tcp://10.33.1.124:21554/")
+        self.server.set_endpoint("opc.tcp://10.34.0.95:21554/")
         self.server.set_server_name("ROS UA Server")
         self.server.start()
 
