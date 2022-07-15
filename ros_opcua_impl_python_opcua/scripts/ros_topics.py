@@ -128,30 +128,30 @@ class OpcUaROSTopic:
 
     @uamethod
     def opcua_update_callback(self, parent):
-        print("opcua object change callback -> ROS publisher is called")
+        print("!!!OPC-UA Object Change Callback :: ROS Publisher is Called!!!")
         if self._publisher is not None:
             try:
                 for nodeName in self._nodes:
                     child = self._nodes[nodeName]
                     name = child.get_display_name().Text
-                    print ("changed attribute:",name)
+                    print ("Changed attribute:", name)
                     if hasattr(self.message_instance, name):
                         if child.get_node_class() == ua.NodeClass.Variable:
                             setattr(self.message_instance, name,
                                     correct_type(child, type(getattr(self.message_instance, name))))
                         elif child.get_node_class == ua.NodeClass.Object:
                             setattr(self.message_instance, name, self.create_message_instance(child))
-                print("ros message:",self.name,self.message_instance)
+                print("ROS Message:", self.name, self.message_instance)
                 self._publisher.publish(self.message_instance)
                
 
             except:
-                rospy.logerr("Error when updating node " + self.name, e)
+                rospy.logerr("Error when updating node" + self.name, e)
                 self.server.server.delete_nodes([self.parent])
         else:
-            print("opcua object chnage but no publisher available for:",self.name,self.message_instance)
+            print('OPC-UA object changed but no publisher available for:', self.name, self.message_instance)
                
-        print("opcua object change callback finished.")
+        print("OPC-UA object change callback finished.")
              
 
 # TODO: Update_Value cant extract topic info of the following topic: 
@@ -174,23 +174,23 @@ class OpcUaROSTopic:
                             self._recursive_create_items(self._nodes[topic_name], topic_name + '[%d]' % index,
                                                          base_type_str,
                                                          slot, None)
-            if (len(message) > 0):
-                for index, slot in enumerate(message):
-                    if topic_name + '[%d]' % index in self._nodes:
-                        self.update_value(topic_name + '[%d]' % index, slot)
-                    else:
-                        if topic_name in self._nodes:
-                            base_type_str = _extract_array_info_python(type(slot))
-                            self._recursive_create_items(self._nodes[topic_name], self.idx, topic_name + '[%d]' % index,
-                                                base_type_str,
-                                                slot, None)
+            # if (len(message) > 0):
+            #     for index, slot in enumerate(message):
+            #         if topic_name + '[%d]' % index in self._nodes:
+            #             self.update_value(topic_name + '[%d]' % index, slot)
+            #         else:
+            #             if topic_name in self._nodes:
+            #                 base_type_str = _extract_array_info_python(type(slot))
+            #                 self._recursive_create_items(self._nodes[topic_name], self.idx, topic_name + '[%d]' % index,
+            #                                     base_type_str,
+            #                                     slot, None)
             # remove obsolete children
-            # if topic_name in self._nodes:
-            #     if len(message) < len(self._nodes[topic_name].get_children()):
-            #         for i in range(len(message), self._nodes[topic_name].childCount()):
-            #             item_topic_name = topic_name + '[%d]' % i
-            #             self.recursive_delete_items(self._nodes[item_topic_name])
-            #             del self._nodes[item_topic_name]
+            if topic_name in self._nodes:
+                if len(message) < len(self._nodes[topic_name].get_children()):
+                    for i in range(len(message), self._nodes[topic_name].childCount()):
+                        item_topic_name = topic_name + '[%d]' % i
+                        self.recursive_delete_items(self._nodes[item_topic_name])
+                        del self._nodes[item_topic_name]
         else:
             if topic_name in self._nodes and self._nodes[topic_name] is not None:
                 self._nodes[topic_name].set_value(message)
@@ -212,7 +212,7 @@ class OpcUaROSTopic:
             name = child.get_display_name().Text
             if hasattr(self.message_instance, name):
                 if child.get_node_class() == ua.NodeClass.Variable:
-                    print(type(getattr(self.message_instance, name)), 'correction')
+                    print(type(getattr(self.message_instance, name)), 'Correction')
                     setattr(self.message_instance, name,
                             correct_type(child, type(getattr(self.message_instance, name))))
                 elif child.get_node_class == ua.NodeClass.Object:
@@ -273,7 +273,7 @@ def correct_type(node, typemessage):
         if typemessage.__name__ == "int":
             result = int(result) & 0xff
     else:
-        rospy.logerr("can't convert: " + str(node.get_data_value.Value))
+        rospy.logerr("Can't Convert: " + str(node.get_data_value.Value))
         return None
     return result
 
@@ -290,7 +290,7 @@ def _extract_array_info_python(type_python):
     elif type_python == bool:
         type_str="bool[]"
     else:
-        print("NOT FOUND TYPE:",type_python)
+        print("NOT FOUND TYPE:", type_python)
 
     return type_str
 
@@ -342,7 +342,7 @@ def _create_node_with_type(parent, idx, topic_name, topic_text, type_name, array
     elif type_name == 'string':
         dv = ua.Variant('', ua.VariantType.String)
     else:
-        rospy.logerr("can't create node with type" + str(type_name))
+        rospy.logerr("Can't create node with type" + str(type_name))
         return None
 
     if array_size is not None:

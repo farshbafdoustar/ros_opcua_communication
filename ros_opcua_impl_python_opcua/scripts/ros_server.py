@@ -55,8 +55,8 @@ class ROSServer:
         self.actionsDict = {}
         rospy.init_node("rosopcua")
         self.server = Server()
-        self.server.set_endpoint("opc.tcp://10.33.1.124:21554/")
-        self.server.set_server_name("ROS ua Server")
+        self.server.set_endpoint("opc.tcp://10.34.0.95:21554/")
+        self.server.set_server_name("ROS UA Server")
         self.server.start()
 
         self.method_map = None
@@ -79,11 +79,6 @@ class ROSServer:
         services_object = objects.add_object(idx_services, "ROS-Services")
         actions_object = objects.add_object(idx_actions, "ROS_Actions")
 
-        # hh
-        # self.client = Client("opc.tcp://0.0.0.0:21554/",timeout=10)
-        # self.client.connect()
-        # print("client conected")
-
         # while not rospy.is_shutdown():
 
         all_topics_lst = self.get_all_topics()
@@ -105,11 +100,8 @@ class ROSServer:
             sub = self.server.create_subscription(period=1, handler=self)
             handle = sub.subscribe_data_change(sub_lst)
         except:
-            print("Can not create_subscription for this object:",key)
-            
-            #print(sub_lst)
+            print("Can not create_subscription for this object:", key)
 
-        #print(self.method_map)
         print("ROS OPCUA Server initialized.")
         while not rospy.is_shutdown():
             rospy.spin()
@@ -119,12 +111,9 @@ class ROSServer:
         self.server.stop()
         print("ROS OPCUA Server stopped.")
         quit()
-        
-        
-
+ 
     def get_all_topics(self):
         # function to provide topics
-       
         all_ros_topics = []
         all_ros_topics.append(['/teststation/controller/digital_output_activate_head_thread_cutter/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
         all_ros_topics.append(['/teststation/controller/digital_output_activate_head_thread_tension/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
@@ -202,9 +191,6 @@ class ROSServer:
         # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_8/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
         # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_9/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
         # all_ros_topics.append(['/workcell_smp_irb2600/controller/digital_output_vacuum_valve_zone_10/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
-        
-        
-        
         return all_ros_topics
 
     # cb
