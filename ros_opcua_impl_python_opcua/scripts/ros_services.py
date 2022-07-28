@@ -127,7 +127,7 @@ class OpcUaROSService:
             if name != '':
                 try:
                     nodewithsamename = self.server.find_service_node_with_same_name(name, idx)
-                    rospy.logdebug("nodewithsamename for name: " + str(name) + " is : " + str(nodewithsamename))
+                    rospy.logdebug("node with same name for name: " + str(name) + " is : " + str(nodewithsamename))
                     if nodewithsamename is not None:
                         rospy.logdebug("recursive call for same name for: " + name)
                         return self.recursive_create_objects(ros_server.nextname(hierachy, hierachy.index(name)), idx,
