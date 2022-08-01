@@ -7,6 +7,7 @@ from email.mime import base
 from hashlib import new
 import re
 from tokenize import Double, String
+from unicodedata import name
 import numpy
 import random
 
@@ -274,6 +275,7 @@ def merge_two_dicts(x, y):
 # to unsigned integers as to fulfill ros specification. Currently only uses a few different types,
 # no other types encountered so far.
 def correct_type(node, typemessage):
+    print(node, 'reched here')
     data_value = node.get_data_value()
     result = node.get_value()
     if isinstance(data_value, ua.DataValue):
@@ -290,10 +292,17 @@ def correct_type(node, typemessage):
         return None
     
     newnode = node.nodeid.to_string()
-    if newnode.find('/value') != -1:
-        result = [result]
-    if newnode.find('/name') != -1:
-        result = [result]
+    resultstr = str(result)
+    if newnode.find('name') != -1:
+        if resultstr.find(',') != -1:
+            result = result.split(',')
+        else:    
+            result = [result]
+    if newnode.find('value') != -1:
+        if resultstr.find(',') != -1:
+            result = result
+        else:
+            result = [result]
     return result
 
 def _extract_array_info_python(type_python):
@@ -364,7 +373,6 @@ def _create_node_with_type(parent, idx, topic_name, topic_text, type_name, array
     else:
         rospy.logerr("Can't create node with type" + str(type_name))
         return None
-
     if array_size is not None:
         value = []
         for i in range(array_size):
@@ -374,13 +382,12 @@ def _create_node_with_type(parent, idx, topic_name, topic_text, type_name, array
                                ua.QualifiedName(topic_text, parent.nodeid.NamespaceIndex), dv.Value)
 
 def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, array_size):
-
     if '[' in type_name:
         type_name = type_name[:type_name.index('[')]
         is_array = True
 
     if type_name == 'bool':
-        dv = ua.Variant([False], ua.VariantType.Boolean)
+        dv = ua.Variant([False, False], ua.VariantType.Boolean)
     elif type_name == 'byte':
         dv = ua.Variant([0], ua.VariantType.Byte)
     elif type_name == 'int':

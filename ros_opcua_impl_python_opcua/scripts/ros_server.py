@@ -129,7 +129,7 @@ class ROSServer:
         all_ros_topics = []
         all_ros_topics.append(['/teststation/controller/digital_output_activate_head_thread_cutter/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
         all_ros_topics.append(['/teststation/controller/digital_output_activate_head_thread_tension/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/digital_output_close_sewing_head/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
+        #all_ros_topics.append(['/teststation/controller/digital_output_close_sewing_head/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
         all_ros_topics.append(['/teststation/controller/digital_output_open_sewing_head/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
         all_ros_topics.append(['/teststation/controller/digital_output_unlock_tool_changer/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
         #all_ros_topics.append(['/teststation/controller/digital_output_unlock_tool_changer/command', 'std_msgs/Bool',self.INPUT_TOPIC])
