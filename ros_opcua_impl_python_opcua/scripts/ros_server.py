@@ -210,14 +210,6 @@ class ROSServer:
 
     def datachange_notification(self, node, val, data):
         str = node.nodeid.to_string()
-        # if str.find("/name") != -1:
-        #     str = str + '[0]'
-        #     nodeid_str = ua.NodeId.from_string(str)
-        #     node = self.server.get_node(nodeid_str)
-        # if str.find('/value') != -1:
-        #     str = str + '[0]'
-        #     nodeid_str = ua.NodeId.from_string(str)
-        #     node = self.server.get_node(nodeid_str)
         method_str = self.method_map[str]
         method = self.server.get_node(method_str)
         node.call_method(method)

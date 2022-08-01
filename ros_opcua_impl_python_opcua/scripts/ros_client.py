@@ -13,9 +13,9 @@ import rospy
 from opcua import Client
 
 
-class SubHandler(object):
-    def datachange_notification(self, node, val, data):
-        node.call_method()
+# class SubHandler(object):
+#     def datachange_notification(self, node, val, data):
+#         node.call_method()
 
 
 class ROSClient:

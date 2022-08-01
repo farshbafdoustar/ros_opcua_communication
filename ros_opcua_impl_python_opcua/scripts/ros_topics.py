@@ -71,8 +71,7 @@ class OpcUaROSTopic:
                 rospy.loginfo("TOPIC is not Input or output: " + str(self.name))  
         
         
-        self.opcua_update_callback(self.parent)
-        self.opcua_update_callback(self.name)
+        #self.opcua_update_callback(self.parent)
 
         # return self.child_to_update_method_map
 
@@ -387,7 +386,7 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
         is_array = True
 
     if type_name == 'bool':
-        dv = ua.Variant([False, False], ua.VariantType.Boolean)
+        dv = ua.Variant([True, False], ua.VariantType.Boolean)
     elif type_name == 'byte':
         dv = ua.Variant([0], ua.VariantType.Byte)
     elif type_name == 'int':
