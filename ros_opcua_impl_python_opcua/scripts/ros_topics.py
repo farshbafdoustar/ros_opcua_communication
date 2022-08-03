@@ -274,7 +274,6 @@ def merge_two_dicts(x, y):
 # to unsigned integers as to fulfill ros specification. Currently only uses a few different types,
 # no other types encountered so far.
 def correct_type(node, typemessage):
-    print(node, 'reched here')
     data_value = node.get_data_value()
     result = node.get_value()
     if isinstance(data_value, ua.DataValue):
@@ -386,7 +385,7 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
         is_array = True
 
     if type_name == 'bool':
-        dv = ua.Variant([True, False], ua.VariantType.Boolean)
+        dv = ua.Variant([False], ua.VariantType.Boolean)
     elif type_name == 'byte':
         dv = ua.Variant([0], ua.VariantType.Byte)
     elif type_name == 'int':
