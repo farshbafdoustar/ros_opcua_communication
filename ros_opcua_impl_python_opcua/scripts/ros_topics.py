@@ -181,7 +181,6 @@ class OpcUaROSTopic:
                         if topic_name in self._nodes:
                             base_type_str, _ = _extract_array_info(
                                 self._nodes[topic_name].text(self.type_name))
-                            print('update else')
                             self._recursive_create_items(self._nodes[topic_name], topic_name + '[%d]' % index,
                                                          base_type_str,
                                                          slot, None)
@@ -329,7 +328,6 @@ def _extract_array_info(type_str):
             array_size = int(array_size_str)
         else:
             array_size = 0
-    print(type_str, array_size)
     return type_str, array_size
 
 
@@ -421,7 +419,6 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
     #     value = []
     #     for i in range(array_size):
     #         value.append(i)
-    print(ua.QualifiedName(topic_text, parent.nodeid.NamespaceIndex), dv.Value, 'print')
     return parent.add_variable(ua.NodeId(topic_name, parent.nodeid.NamespaceIndex),
                                ua.QualifiedName(topic_text, parent.nodeid.NamespaceIndex), dv.Value)
 
