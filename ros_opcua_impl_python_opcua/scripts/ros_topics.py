@@ -134,7 +134,7 @@ class OpcUaROSTopic:
         return
 
     def message_callback(self, message):
-        print(message, 'msg')
+        #print(message, 'msg')
         self.update_value(self.name, message)
 
 

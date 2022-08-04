@@ -136,10 +136,10 @@ class ROSServer:
         all_ros_topics.append(['/teststation/controller/digital_output_open_sewing_head/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
         all_ros_topics.append(['/teststation/controller/digital_output_unlock_tool_changer/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
         #all_ros_topics.append(['/joint_states', 'sensor_msgs/JointState',self.INPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/digital_input_head_thread_cutter/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        #all_ros_topics.append(['/teststation/controller/digital_input_head_thread_cutter/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
         all_ros_topics.append(['/teststation/controller/digital_input_head_opening/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/digital_input_head_needle_in_cutting_position/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/digital_input_head_needle_on_zero/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        #all_ros_topics.append(['/teststation/controller/digital_input_head_needle_in_cutting_position/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        #all_ros_topics.append(['/teststation/controller/digital_input_head_needle_on_zero/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
         all_ros_topics.append(['/teststation/controller/digital_input_tool_changer_lock/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
 
         # all_ros_topics.append(['/workcell_smp_irb2600/controller/position_trajectory_controller/state', 'control_msgs/JointTrajectoryControllerState',self.INPUT_TOPIC])
