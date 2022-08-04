@@ -385,7 +385,7 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
         is_array = True
 
     if type_name == 'bool':
-        dv = ua.Variant([False], ua.VariantType.Boolean)
+        dv = ua.Variant([True, False], ua.VariantType.Boolean)
     elif type_name == 'byte':
         dv = ua.Variant([0], ua.VariantType.Byte)
     elif type_name == 'int':
@@ -417,11 +417,11 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
         rospy.logerr("Can't create node with type" + str(type_name))
         return None
 
-    if array_size is not None:
-        value = []
-        for i in range(array_size):
-            value.append(i)
-
+    # if array_size is not None:
+    #     value = []
+    #     for i in range(array_size):
+    #         value.append(i)
+    print(ua.QualifiedName(topic_text, parent.nodeid.NamespaceIndex), dv.Value, 'print')
     return parent.add_variable(ua.NodeId(topic_name, parent.nodeid.NamespaceIndex),
                                ua.QualifiedName(topic_text, parent.nodeid.NamespaceIndex), dv.Value)
 
@@ -482,24 +482,22 @@ def refresh_topics_and_actions(namespace_ros, server, topicsdict, actionsdict, i
     ros_topics = rospy.get_published_topics(namespace_ros)
 
     # use to not get dict changed during iteration errors
-    # tobedeleted = []
-    # for topic_nameOPC in topicsdict:
-    #     found = False
-    #     for topicROS, topic_type in ros_topics:
-    #         if topic_nameOPC == topicROS:
-    #             found = True
-    #     if not found:
-    #         print(topic_nameOPC)
+    tobedeleted = []
+    for topic_nameOPC in topicsdict:
+        found = False
+        for topicROS, topic_type in ros_topics:
+            if topic_nameOPC == topicROS:
+                found = True
+        if not found:
+            print(topic_nameOPC)
 
-    #         #HERE the idea is deleting the topics from opcua that h as not publisher
-    #         #but actually the code has problem with server?? @Hamoon
-    #         topicsdict[topic_nameOPC].recursive_delete_items(server.get_node(ua.NodeId(topic_nameOPC, idx_topics)))
-    #         tobedeleted.append(topic_nameOPC)
-    # for name in tobedeleted:
-    #     del topicsdict[name]
-    #ros_actions.refresh_dict(namespace_ros, actionsdict, topicsdict, server, idx_actions)
-
-    # return topicsdict
+            #HERE the idea is deleting the topics from opcua that h as not publisher
+            #but actually the code has problem with server?? @Hamoon
+            topicsdict[topic_nameOPC].recursive_delete_items(server.get_node(ua.NodeId(topic_nameOPC, idx_topics)))
+            tobedeleted.append(topic_nameOPC)
+    for name in tobedeleted:
+        del topicsdict[name]
+    ros_actions.refresh_dict(namespace_ros, actionsdict, topicsdict, server, idx_actions)
     return all_child_to_method_maps
 
 
