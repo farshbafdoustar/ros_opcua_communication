@@ -2,12 +2,6 @@
 
 # Thanks to:
 # https://github.com/ros-visualization/rqt_common_plugins/blob/groovy-devel/rqt_topic/src/rqt_topic/topic_widget.py
-from array import array
-from email.mime import base
-from hashlib import new
-import re
-from tokenize import Double, String
-from unicodedata import name
 import numpy
 import random
 
@@ -20,6 +14,7 @@ import ros_actions
 import ros_server
 import rostopic
 
+from io_controllers_msgs.msg import DigitalStateCommand
 from geometry_msgs.msg import TransformStamped
 from io_controllers_msgs.msg import *
 from trajectory_msgs.msg import JointTrajectory
@@ -113,7 +108,6 @@ class OpcUaROSTopic:
                     self._recursive_create_items(parent, idx, topic_name + '[%d]' % index, base_type_str, base_instance)
             
             elif array_size is not None:
-                #index = 0
                 array_size = 1
                 new_node = _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, array_size)
                 self._nodes[topic_name] = new_node
@@ -134,7 +128,7 @@ class OpcUaROSTopic:
         return
 
     def message_callback(self, message):
-        #print(message, 'msg')
+        print(message)
         self.update_value(self.name, message)
 
 
@@ -275,6 +269,7 @@ def merge_two_dicts(x, y):
 def correct_type(node, typemessage):
     data_value = node.get_data_value()
     result = node.get_value()
+    #print(result)
     if isinstance(data_value, ua.DataValue):
         if typemessage.__name__ == "float":
             result = numpy.float(result)
@@ -293,13 +288,15 @@ def correct_type(node, typemessage):
     if newnode.find('name') != -1:
         if resultstr.find(',') != -1:
             result = result.split(',')
-        else:    
+            print(result)
+        else:
             result = [result]
     if newnode.find('value') != -1:
         if resultstr.find(',') != -1:
             result = result
         else:
             result = [result]
+    print(type(result), type(result[0]), 'type')
     return result
 
 def _extract_array_info_python(type_python):
@@ -409,16 +406,16 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
     elif type_name == 'double':
         dv = ua.Variant([0.0], ua.VariantType.Double)
     elif type_name == 'string':
-        dv = ua.Variant([''], ua.VariantType.String)
+        dv = ua.Variant(['a', 'b'], ua.VariantType.String)
 
     else:
         rospy.logerr("Can't create node with type" + str(type_name))
         return None
 
-    # if array_size is not None:
-    #     value = []
-    #     for i in range(array_size):
-    #         value.append(i)
+    if array_size is not None:
+        value = []
+        for i in range(array_size):
+            value.append(i)
     return parent.add_variable(ua.NodeId(topic_name, parent.nodeid.NamespaceIndex),
                                ua.QualifiedName(topic_text, parent.nodeid.NamespaceIndex), dv.Value)
 
@@ -444,7 +441,7 @@ def refresh_topics_and_actions(namespace_ros, server, topicsdict, actionsdict, i
 
     rospy.logdebug(str(ros_topics))
     rospy.logdebug(str(rospy.get_published_topics('/move_base_simple')))
-    for topic_name, topic_type,io_type in ros_topics:
+    for topic_name, topic_type, io_type in ros_topics:
         if topic_name not in topicsdict or topicsdict[topic_name] is None:
             splits = topic_name.split('/')
             if "cancel" in splits[-1] or "result" in splits[-1] or "feedback" in splits[-1] or "goal" in splits[-1] or "status" in splits[-1]:
@@ -487,11 +484,10 @@ def refresh_topics_and_actions(namespace_ros, server, topicsdict, actionsdict, i
                 found = True
         if not found:
             print(topic_nameOPC)
-
-            #HERE the idea is deleting the topics from opcua that h as not publisher
+            #HERE the idea is deleting the topics from opcua that has not publisher
             #but actually the code has problem with server?? @Hamoon
-            topicsdict[topic_nameOPC].recursive_delete_items(server.get_node(ua.NodeId(topic_nameOPC, idx_topics)))
-            tobedeleted.append(topic_nameOPC)
+            # topicsdict[topic_nameOPC].recursive_delete_items(server.get_node(ua.NodeId(topic_nameOPC, idx_topics)))
+            # tobedeleted.append(topic_nameOPC)
     for name in tobedeleted:
         del topicsdict[name]
     ros_actions.refresh_dict(namespace_ros, actionsdict, topicsdict, server, idx_actions)

@@ -1,30 +1,20 @@
 #!/usr/bin/env python
-from lib2to3.pytree import Node
-from multiprocessing.connection import Client
-from operator import contains
-from platform import node
-from pydoc import cli
-from pydoc_data.topics import topics
 import sys
-import this
 import time
-from webbrowser import get
+import ast
 
 import rosgraph
 import rosnode
 import rospy
 from opcua import Server, ua
 
-
 import ros_services
 import ros_topics
 
 from io_controllers_msgs.msg import *
-from std_msgs.msg import *
 from control_msgs.msg import *
 from trajectory_msgs import *
-
-#client = ros_client.ROSClient("opc.tcp://0.0.0.0:21554/")
+from std_msgs.msg import *
 
 # Returns the hierachy as one string from the first remaining part on.
 sub_lst = []
@@ -41,12 +31,12 @@ def nextname(hierachy, index_of_last_processed):
         rospy.logerr("Error encountered ", e)
 
 
-# def own_rosnode_cleanup():
-#     pinged, unpinged = rosnode.rosnode_ping_all()
-#     if unpinged:
-#         master = rosgraph.Master(rosnode.ID)
-#         # noinspection PyTypeChecker
-#         rosnode.cleanup_master_blacklist(master, unpinged)
+def own_rosnode_cleanup():
+    pinged, unpinged = rosnode.rosnode_ping_all()
+    if unpinged:
+        master = rosgraph.Master(rosnode.ID)
+        # noinspection PyTypeChecker
+        rosnode.cleanup_master_blacklist(master, unpinged)
 
 
 class ROSServer:
@@ -59,12 +49,11 @@ class ROSServer:
         rospy.init_node("rosopcua")
         self.server = Server()
         self.server.set_endpoint("opc.tcp://10.33.1.124:21554/")
-        self.server.set_server_name("ROS UA Server")
+        self.server.set_server_name("ROS OPCUA Server")
         self.server.start()
         self.method_map = None
         self.INPUT_TOPIC="INPUT"
         self.OUTPUT_TOPIC="OUTPUT"
-
         # setup our own namespaces, this is expected
         uri_topics = "http://ros.org/topics"
         # two different namespaces to make getting the correct node easier for get_node (otherwise had object for service and topic with same name
@@ -90,22 +79,10 @@ class ROSServer:
         self.method_map = ros_topics.refresh_topics_and_actions(self.namespace_ros, self, self.topicsDict, self.actionsDict,
                                                                 idx_topics, idx_actions, topics_object, actions_object, all_topics_lst)
         # hh
-        
         for key in self.method_map:
             for topic_name, topic_type, io_type in all_topics_lst:
                 if io_type==self.OUTPUT_TOPIC and topic_name in key:
                     leaf_node = self.server.get_node(key)
-                    # str = leaf_node.nodeid.to_string()
-                    # if str.find("/name") != -1:
-                    #     str = str + '[0]'
-                    #     nodeid_str = ua.NodeId.from_string(str)
-                    #     nodeid = self.server.get_node(nodeid_str)
-                    #     sub_lst.append(nodeid)
-                    # if str.find('/value') != -1:
-                    #     str = str + '[0]'
-                    #     nodeid_str = ua.NodeId.from_string(str)
-                    #     nodeid = self.server.get_node(nodeid_str)
-                    #     sub_lst.append(nodeid)
                     sub_lst.append(leaf_node)                 
         try:
             sub = self.server.create_subscription(period=1, handler=self)
@@ -126,21 +103,21 @@ class ROSServer:
  
     def get_all_topics(self):
         # function to provide topics
-        all_ros_topics = []
-        all_ros_topics.append(['/teststation/controller/digital_output_activate_head_thread_cutter/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/digital_output_activate_head_thread_tension/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
-        #all_ros_topics.append(['/teststation/controller/digital_output_close_sewing_head/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/digital_output_open_sewing_head/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/digital_output_unlock_tool_changer/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
+        ros_topics = rospy.get_param("/rosopcua/topics_glob")
+        all_ros_topics = ast.literal_eval(ros_topics)
+        # all_ros_topics.append(['/teststation/controller/digital_output_activate_head_thread_cutter/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/digital_output_activate_head_thread_tension/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/digital_output_open_sewing_head/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/digital_output_unlock_tool_changer/commands', 'io_controllers_msgs/DigitalStateCommand',self.OUTPUT_TOPIC])
         # all_ros_topics.append(['/teststation/controller/digital_output_close_sewing_head/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
         # all_ros_topics.append(['/teststation/controller/digital_output_open_sewing_head/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
         # all_ros_topics.append(['/teststation/controller/digital_output_unlock_tool_changer/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
         #all_ros_topics.append(['/joint_states', 'sensor_msgs/JointState',self.INPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/digital_input_head_thread_cutter/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/digital_input_head_opening/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/digital_input_head_needle_in_cutting_position/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/digital_input_head_needle_on_zero/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/digital_input_tool_changer_lock/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/digital_input_head_thread_cutter/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/digital_input_head_opening/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/digital_input_head_needle_in_cutting_position/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/digital_input_head_needle_on_zero/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
+        # all_ros_topics.append(['/teststation/controller/digital_input_tool_changer_lock/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
 
         # all_ros_topics.append(['/workcell_smp_irb2600/controller/position_trajectory_controller/state', 'control_msgs/JointTrajectoryControllerState',self.INPUT_TOPIC])
         # all_ros_topics.append(['/workcell_smp_irb2600/controller/table_controller/state', 'control_msgs/JointTrajectoryControllerState',self.INPUT_TOPIC])
