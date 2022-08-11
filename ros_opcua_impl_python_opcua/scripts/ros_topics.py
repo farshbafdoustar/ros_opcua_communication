@@ -128,7 +128,6 @@ class OpcUaROSTopic:
         return
 
     def message_callback(self, message):
-        print(message)
         self.update_value(self.name, message)
 
 
