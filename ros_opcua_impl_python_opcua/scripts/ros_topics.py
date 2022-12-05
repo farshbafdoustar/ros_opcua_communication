@@ -214,10 +214,8 @@ class OpcUaROSTopic:
     def create_message_instance(self, node):
         for child in node.get_children():
             name = child.get_display_name().Text
-            print(name, self.message_instance, 'create')
             if hasattr(self.message_instance, name):
                 if child.get_node_class() == ua.NodeClass.Variable:
-                    print(type(getattr(self.message_instance, name)), 'Correction')
                     setattr(self.message_instance, name,
                             correct_type(child, type(getattr(self.message_instance, name))))
                 elif child.get_node_class == ua.NodeClass.Object:
@@ -268,7 +266,6 @@ def merge_two_dicts(x, y):
 def correct_type(node, typemessage):
     data_value = node.get_data_value()
     result = node.get_value()
-    #print(result)
     if isinstance(data_value, ua.DataValue):
         if typemessage.__name__ == "float":
             result = numpy.float(result)
@@ -287,7 +284,6 @@ def correct_type(node, typemessage):
     if newnode.find('name') != -1:
         if resultstr.find(',') != -1:
             result = result.split(',')
-            print(result)
         else:
             result = [result]
     if newnode.find('value') != -1:
@@ -295,7 +291,6 @@ def correct_type(node, typemessage):
             result = result
         else:
             result = [result]
-    print(type(result), type(result[0]), 'type')
     return result
 
 def _extract_array_info_python(type_python):
@@ -379,7 +374,7 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
         is_array = True
 
     if type_name == 'bool':
-        dv = ua.Variant([True, False], ua.VariantType.Boolean)
+        dv = ua.Variant([True, False, True, False, True, False], ua.VariantType.Boolean)
     elif type_name == 'byte':
         dv = ua.Variant([0], ua.VariantType.Byte)
     elif type_name == 'int':
@@ -405,7 +400,7 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
     elif type_name == 'double':
         dv = ua.Variant([0.0], ua.VariantType.Double)
     elif type_name == 'string':
-        dv = ua.Variant(['a', 'b'], ua.VariantType.String)
+        dv = ua.Variant(['', ''], ua.VariantType.String)
 
     else:
         rospy.logerr("Can't create node with type" + str(type_name))
@@ -482,7 +477,7 @@ def refresh_topics_and_actions(namespace_ros, server, topicsdict, actionsdict, i
             if topic_nameOPC == topicROS:
                 found = True
         if not found:
-            print(topic_nameOPC)
+            print(topic_nameOPC, 'to be deleted not found')
             #HERE the idea is deleting the topics from opcua that has not publisher
             #but actually the code has problem with server?? @Hamoon
             # topicsdict[topic_nameOPC].recursive_delete_items(server.get_node(ua.NodeId(topic_nameOPC, idx_topics)))
