@@ -374,7 +374,7 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
         is_array = True
 
     if type_name == 'bool':
-        dv = ua.Variant([True, False, True, False, True, False, True, False, True, False, True, False, True, False, True, False], ua.VariantType.Boolean)
+        dv = ua.Variant([True, False], ua.VariantType.Boolean)
     elif type_name == 'byte':
         dv = ua.Variant([0], ua.VariantType.Byte)
     elif type_name == 'int':
@@ -400,7 +400,7 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
     elif type_name == 'double':
         dv = ua.Variant([0.0], ua.VariantType.Double)
     elif type_name == 'string':
-        dv = ua.Variant(['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''], ua.VariantType.String)
+        dv = ua.Variant(['', ''], ua.VariantType.String)
 
     else:
         rospy.logerr("Can't create node with type" + str(type_name))
