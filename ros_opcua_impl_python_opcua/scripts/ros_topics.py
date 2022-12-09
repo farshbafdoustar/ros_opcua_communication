@@ -342,12 +342,12 @@ def _create_node_with_type(parent, idx, topic_name, topic_text, type_name, array
         dv = ua.Variant(0, ua.VariantType.Int16)
     elif type_name == 'uint16':
         dv = ua.Variant(0, ua.VariantType.UInt16)
-    elif type_name == 'int32':
+    elif type_name == 'int32' or type_name == 'int64':
         dv = ua.Variant(0, ua.VariantType.Int32)
     elif type_name == 'uint32':
         dv = ua.Variant(0, ua.VariantType.UInt32)
-    elif type_name == 'int64':
-        dv = ua.Variant(0, ua.VariantType.Int64)
+    # elif type_name == 'int64':
+    #     dv = ua.Variant(0, ua.VariantType.Int64)
     elif type_name == 'uint64':
         dv = ua.Variant(0, ua.VariantType.UInt64)
     elif type_name == 'float' or type_name == 'float32' or type_name == 'float64':
