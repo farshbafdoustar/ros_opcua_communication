@@ -76,7 +76,7 @@ class OpcUaROSTopic:
         topic_text = topic_name.split('/')[-1]
         if '[' in topic_text:
             topic_text = topic_text[topic_text.index('['):]
-        print(type_name + 'type')
+        print(type_name + ' type_name')
         # This here are 'complex datatypes'
         if hasattr(message, '__slots__') and hasattr(message, '_slot_types'):
             complex_type = True
@@ -328,7 +328,7 @@ def _create_node_with_type(parent, idx, topic_name, topic_text, type_name, array
     if '[' in type_name:
         type_name = type_name[:type_name.index('[')]
         is_array = True
-    print('type 1 is' + type_name)
+    print('type 1 is: ' + type_name)
     if type_name == 'bool':
         dv = ua.Variant(False, ua.VariantType.Boolean)
     elif type_name == 'byte':
@@ -373,7 +373,7 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
     if '[' in type_name:
         type_name = type_name[:type_name.index('[')]
         is_array = True
-    print('type 2 is' + type_name)
+    print('type 2 is: ' + type_name)
     if type_name == 'bool':
         dv = ua.Variant([True, False], ua.VariantType.Boolean)
     elif type_name == 'byte':
@@ -406,7 +406,7 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
     else:
         rospy.logerr("Can't create node with type" + str(type_name))
         return None
-    print('val2' + dv)
+    print('val2' + dv.Value)
     if array_size is not None:
         value = []
         for i in range(array_size):
