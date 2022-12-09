@@ -69,8 +69,8 @@ class ROSServer:
 
         # one object per type we are watching
         topics_object = objects.add_object(idx_topics, "ROS-Topics")
-        services_object = objects.add_object(idx_services, "ROS-Services")
-        actions_object = objects.add_object(idx_actions, "ROS_Actions")
+        #services_object = objects.add_object(idx_services, "ROS-Services")
+        #actions_object = objects.add_object(idx_actions, "ROS_Actions")
 
         # while not rospy.is_shutdown():
 
