@@ -365,7 +365,7 @@ def _create_node_with_type(parent, idx, topic_name, topic_text, type_name, array
         value = []
         for i in range(array_size):
             value.append(i)
-    print('val1' + dv)   
+    print('val1' + dv.Value)   
     return parent.add_variable(ua.NodeId(topic_name, parent.nodeid.NamespaceIndex),
                                ua.QualifiedName(topic_text, parent.nodeid.NamespaceIndex), dv.Value)
 
