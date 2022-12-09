@@ -437,7 +437,7 @@ def refresh_topics_and_actions(namespace_ros, server, topicsdict, actionsdict, i
     for topic_name, topic_type, io_type in ros_topics:
         if topic_name not in topicsdict or topicsdict[topic_name] is None:
             splits = topic_name.split('/')
-            if "cancel" in splits[-1] or "result" in splits[-1] or "feedback" in splits[-1] or "goal" in splits[-1] or "status" in splits[-1]:
+            if "cancel" in splits[-1] and "result" in splits[-1] and "feedback" in splits[-1] and "goal" in splits[-1] and "status" in splits[-1]:
                 rospy.logdebug("Found an action: " + str(topic_name))
                 correct_name = ros_actions.get_correct_name(topic_name)
 
