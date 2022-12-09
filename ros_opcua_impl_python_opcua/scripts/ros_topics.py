@@ -76,7 +76,7 @@ class OpcUaROSTopic:
         topic_text = topic_name.split('/')[-1]
         if '[' in topic_text:
             topic_text = topic_text[topic_text.index('['):]
-        
+        print(type_name + 'type')
         # This here are 'complex datatypes'
         if hasattr(message, '__slots__') and hasattr(message, '_slot_types'):
             complex_type = True
@@ -275,6 +275,7 @@ def correct_type(node, typemessage):
             result = numpy.byte(result)
         if typemessage.__name__ == "int":
             result = int(result) & 0xff
+            print(result + 'res')
     else:
         rospy.logerr("Can't Convert: " + str(node.get_data_value.Value))
         return None
@@ -327,7 +328,7 @@ def _create_node_with_type(parent, idx, topic_name, topic_text, type_name, array
     if '[' in type_name:
         type_name = type_name[:type_name.index('[')]
         is_array = True
-
+    print('type 1 is' + type_name)
     if type_name == 'bool':
         dv = ua.Variant(False, ua.VariantType.Boolean)
     elif type_name == 'byte':
@@ -364,7 +365,7 @@ def _create_node_with_type(parent, idx, topic_name, topic_text, type_name, array
         value = []
         for i in range(array_size):
             value.append(i)
-        
+    print('val1' + dv)   
     return parent.add_variable(ua.NodeId(topic_name, parent.nodeid.NamespaceIndex),
                                ua.QualifiedName(topic_text, parent.nodeid.NamespaceIndex), dv.Value)
 
@@ -372,7 +373,7 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
     if '[' in type_name:
         type_name = type_name[:type_name.index('[')]
         is_array = True
-
+    print('type 2 is' + type_name)
     if type_name == 'bool':
         dv = ua.Variant([True, False], ua.VariantType.Boolean)
     elif type_name == 'byte':
@@ -405,7 +406,7 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
     else:
         rospy.logerr("Can't create node with type" + str(type_name))
         return None
-
+    print('val2' + dv)
     if array_size is not None:
         value = []
         for i in range(array_size):
