@@ -155,7 +155,7 @@ class OpcUaROSTopic:
             print('OPC-UA object changed but no publisher available for:', self.name, self.message_instance)
                
         print("OPC-UA object change callback finished.")
-             
+
 
 # TODO: Update_Value cant extract topic info of the following topic: 
 # all_ros_topics.append(['/teststation/controller/position_trajectory_controller/command', 'trajectory_msgs/JointTrajectory',self.INPUT_TOPIC])
@@ -296,15 +296,15 @@ def correct_type(node, typemessage):
 def _extract_array_info_python(type_python):
     type_str = None
     if type_python == str:
-        type_str ="string[]"
+        type_str = "string[]"
     elif type_python == float:
-        type_str="float[]"
+        type_str = "float[]"
     elif type_python == bytearray:
-        type_str="byte[]"
+        type_str = "byte[]"
     elif type_python == int:
-        type_str="int[]"
+        type_str = "int[]"
     elif type_python == bool:
-        type_str="bool[]"
+        type_str = "bool[]"
     else:
         print("NOT FOUND TYPE:", type_python)
 
@@ -389,10 +389,10 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
         dv = ua.Variant([0], ua.VariantType.UInt16)
     elif type_name == 'int32':
         dv = ua.Variant([0], ua.VariantType.Int32)
-    elif type_name == 'uint32':
+    elif type_name == 'uint32' or type_name == 'int64':
         dv = ua.Variant([0], ua.VariantType.UInt32)
-    elif type_name == 'int64':
-        dv = ua.Variant([0], ua.VariantType.Int64)
+    # elif type_name == 'int64':
+    #     dv = ua.Variant([0], ua.VariantType.Int64)
     elif type_name == 'uint64':
         dv = ua.Variant([0], ua.VariantType.UInt64)
     elif type_name == 'float' or type_name == 'float32' or type_name == 'float64':

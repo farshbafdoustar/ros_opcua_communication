@@ -40,7 +40,6 @@ def own_rosnode_cleanup():
 
 
 class ROSServer:
-    
     def __init__(self):
         self.namespace_ros = rospy.get_param("/rosopcua/namespace")
         self.topicsDict = {}
@@ -49,7 +48,9 @@ class ROSServer:
         rospy.init_node("rosopcua")
         self.server = Server()
         # self.server.set_endpoint("opc.tcp://192.168.1.100:21554/")
-        self.server.set_endpoint("opc.tcp://10.34.0.95:21554/")
+        with open('/data/workcell_smp_irb2600/config/vetron_opcua_server.txt', 'r') as txt:
+            txtfile = txt.read()
+        self.server.set_endpoint(txtfile)
         self.server.set_server_name("ROS OPCUA Server")
         self.server.start()
         self.method_map = None
@@ -107,19 +108,6 @@ class ROSServer:
         ros_topics = rospy.get_param("/rosopcua/topics_glob")
         all_ros_topics = ast.literal_eval(ros_topics)
 
-        # all_ros_topics.append(['/workcell_smp_irb2600/controller/position_trajectory_controller/state', 'control_msgs/JointTrajectoryControllerState',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/workcell_smp_irb2600/controller/table_controller/state', 'control_msgs/JointTrajectoryControllerState',self.INPUT_TOPIC])
-
-        # all_ros_topics.append(['/workcell_smp_irb2600/controller/position_trajectory_controller/command', 'trajectory_msgs/JointTrajectory',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/workcell_smp_irb2600/controller/table_controller/command', 'trajectory_msgs/JointTrajectory',self.INPUT_TOPIC])
-
-        # all_ros_topics.append(['/workcell_smp_irb2600/controller/camera_hw_trigger_state/world_to_tcp_transform', 'geometry_msgs/TransformStamped',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/workcell_smp_irb2600/controller/joint_based_transform/world_to_tcp_transform', 'geometry_msgs/TransformStamped',self.INPUT_TOPIC])
-
-        # all_ros_topics.append(['/workcell_smp_irb2600/controller/analog_input_vacuum_sensors/states', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/workcell_smp_irb2600/controller/camera_hw_trigger_state/states', 'io_controllers_msgs/DigitalStateCommandy',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/workcell_smp_irb2600/controller/camera_hw_trigger_state/commands', 'io_controllers_msgs/DigitalStateCommand',self.INPUT_TOPIC])
-
         return all_ros_topics
 
     # cb
@@ -128,8 +116,7 @@ class ROSServer:
         str = node.nodeid.to_string()
         method_str = self.method_map[str]
         method = self.server.get_node(method_str)
-        node.call_method(method)
-        
+        node.call_method(method)   
 
     def find_service_node_with_same_name(self, name, idx):
         print("Reached ServiceCheck for name " + name)
@@ -142,7 +129,6 @@ class ROSServer:
         return None
 
     def find_topics_node_with_same_name(self, name, idx):
-        
         print("Reached TopicCheck for name " + name)
         for topic in self.topicsDict:
             print(
