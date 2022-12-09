@@ -406,7 +406,6 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
     else:
         rospy.logerr("Can't create node with type" + str(type_name))
         return None
-    print('val2' + dv.Value)
     if array_size is not None:
         value = []
         for i in range(array_size):
