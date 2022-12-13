@@ -189,12 +189,12 @@ class OpcUaROSTopic:
                                                          slot, None)
             
             #remove obsolete children
-            if topic_name in self._nodes:
-                if len(message) < len(self._nodes[topic_name].get_children()):
-                    for i in range(len(message), self._nodes[topic_name].childCount()):
-                        item_topic_name = topic_name + '[%d]' % i
-                        self.recursive_delete_items(self._nodes[item_topic_name])
-                        del self._nodes[item_topic_name]
+            # if topic_name in self._nodes:
+            #     if len(message) < len(self._nodes[topic_name].get_children()):
+            #         for i in range(len(message), self._nodes[topic_name].childCount()):
+            #             item_topic_name = topic_name + '[%d]' % i
+            #             self.recursive_delete_items(self._nodes[item_topic_name])
+            #             del self._nodes[item_topic_name]
         else:
             if topic_name in self._nodes and self._nodes[topic_name] is not None:
                 self._nodes[topic_name].set_value(message)
@@ -461,10 +461,10 @@ def refresh_topics_and_actions(namespace_ros, server, topicsdict, actionsdict, i
                 
                 all_child_to_method_maps = merge_two_dicts(all_child_to_method_maps, topic.child_to_update_method_map)
 
-        elif "rosout" not in topic_name:
-            topicsdict[topic_name].recursive_delete_items(server.server.get_node(ua.NodeId(topic_name, idx_topics)))
-            del topicsdict[topic_name]
-            ros_server.own_rosnode_cleanup()
+        # elif numberofsubscribers(topic_name, topicsdict) <= 1 and "rosout" not in topic_name:
+        #     topicsdict[topic_name].recursive_delete_items(server.server.get_node(ua.NodeId(topic_name, idx_topics)))
+        #     del topicsdict[topic_name]
+        #     ros_server.own_rosnode_cleanup()
 
     ros_topics = rospy.get_published_topics(namespace_ros)
 
