@@ -414,13 +414,13 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
 
 
 # Used to delete obsolete topics
-def numberofsubscribers(nametolookfor, topicsDict):
-    # rosout only has one subscriber/publisher at all times, so ignore.
-    if nametolookfor != "/rosout":
-        ret = topicsDict[nametolookfor]._subscriber.get_num_connections()
-    else:
-        ret = 2
-    return ret
+# def numberofsubscribers(nametolookfor, topicsDict):
+#     # rosout only has one subscriber/publisher at all times, so ignore.
+#     if nametolookfor != "/rosout":
+#         ret = topicsDict[nametolookfor]._subscriber.get_num_connections()
+#     else:
+#         ret = 2
+#     return ret
 
 
 def refresh_topics_and_actions(namespace_ros, server, topicsdict, actionsdict, idx_topics, idx_actions, topics, actions, all_topics_lst):
@@ -461,7 +461,7 @@ def refresh_topics_and_actions(namespace_ros, server, topicsdict, actionsdict, i
                 
                 all_child_to_method_maps = merge_two_dicts(all_child_to_method_maps, topic.child_to_update_method_map)
 
-        elif numberofsubscribers(topic_name, topicsdict) <= 1 and "rosout" not in topic_name:
+        elif "rosout" not in topic_name:
             topicsdict[topic_name].recursive_delete_items(server.server.get_node(ua.NodeId(topic_name, idx_topics)))
             del topicsdict[topic_name]
             ros_server.own_rosnode_cleanup()
