@@ -417,7 +417,8 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
 def numberofsubscribers(nametolookfor, topicsDict):
     # rosout only has one subscriber/publisher at all times, so ignore.
     if nametolookfor != "/rosout":
-        ret = topicsDict[nametolookfor]._subscriber.get_subscription_count()
+        # ret = topicsDict[nametolookfor]._subscriber.get_subscription_count()
+        ret = 0
     else:
         ret = 2
     return ret
