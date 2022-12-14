@@ -197,7 +197,7 @@ class OpcUaROSTopic:
                         del self._nodes[item_topic_name]
         else:
             if topic_name in self._nodes and self._nodes[topic_name] is not None:
-                self._nodes[topic_name].set_value(message)
+                self._nodes[topic_name].set_value(message,self._nodes[topic_name].get_data_type_as_variant_type())
 
     def recursive_delete_items(self, item):
         self._publisher.unregister()
