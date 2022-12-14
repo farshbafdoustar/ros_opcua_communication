@@ -343,12 +343,12 @@ def _create_node_with_type(parent, idx, topic_name, topic_text, type_name, array
         dv = ua.Variant(0, ua.VariantType.Int16)
     elif type_name == 'uint16':
         dv = ua.Variant(0, ua.VariantType.UInt16)
-    elif type_name == 'int32' or type_name == 'int64':
+    elif type_name == 'int32':
         dv = ua.Variant(0, ua.VariantType.Int32)
     elif type_name == 'uint32':
         dv = ua.Variant(0, ua.VariantType.UInt32)
-    # elif type_name == 'int64':
-    #     dv = ua.Variant(0, ua.VariantType.Int64)
+    elif type_name == 'int64':
+        dv = ua.Variant(0, ua.VariantType.Int64)
     elif type_name == 'uint64':
         dv = ua.Variant(0, ua.VariantType.UInt64)
     elif type_name == 'float' or type_name == 'float32' or type_name == 'float64':
@@ -366,7 +366,7 @@ def _create_node_with_type(parent, idx, topic_name, topic_text, type_name, array
         for i in range(array_size):
             value.append(i)
     return parent.add_variable(ua.NodeId(topic_name, parent.nodeid.NamespaceIndex),
-                               ua.QualifiedName(topic_text, parent.nodeid.NamespaceIndex), dv.Value)
+                               ua.QualifiedName(topic_text, parent.nodeid.NamespaceIndex), dv.Value, dv.VariantType)
 
 def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, array_size):
     if '[' in type_name:
@@ -387,12 +387,12 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
         dv = ua.Variant([0], ua.VariantType.Int16)
     elif type_name == 'uint16':
         dv = ua.Variant([0], ua.VariantType.UInt16)
-    elif type_name == 'int32' or type_name == 'int64':
+    elif type_name == 'int32':
         dv = ua.Variant([0], ua.VariantType.Int32)
     elif type_name == 'uint32':
         dv = ua.Variant([0], ua.VariantType.UInt32)
-    # elif type_name == 'int64':
-    #     dv = ua.Variant([0], ua.VariantType.Int64)
+    elif type_name == 'int64':
+        dv = ua.Variant([0], ua.VariantType.Int64)
     elif type_name == 'uint64':
         dv = ua.Variant([0], ua.VariantType.UInt64)
     elif type_name == 'float' or type_name == 'float32' or type_name == 'float64':
@@ -410,18 +410,16 @@ def _create_nodearray_with_type(parent, idx, topic_name, topic_text, type_name, 
         for i in range(array_size):
             value.append(i)
     return parent.add_variable(ua.NodeId(topic_name, parent.nodeid.NamespaceIndex),
-                               ua.QualifiedName(topic_text, parent.nodeid.NamespaceIndex), dv.Value)
+                               ua.QualifiedName(topic_text, parent.nodeid.NamespaceIndex), dv.Value, dv.VariantType)
 
 
 # Used to delete obsolete topics
 def numberofsubscribers(nametolookfor, topicsDict):
     # rosout only has one subscriber/publisher at all times, so ignore.
-    if nametolookfor != "/rosout":
-        print(topicsDict[nametolookfor])
-        # ret = topicsDict[nametolookfor]._subscriber.get_subscription_count()
-        ret = 2
-    else:
-        ret = 2
+    # if nametolookfor != "/rosout":
+    #    ret = topicsDict[nametolookfor]._subscriber.get_subscription_count()
+    # else:
+    ret = 2
     return ret
 
 
