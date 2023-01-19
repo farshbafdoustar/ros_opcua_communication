@@ -55,12 +55,12 @@ class OpcUaROSTopic:
         self._recursive_create_items(self.parent, idx, topic_name, topic_type, self.message_instance, True)
         if io_type==INPUT_TOPIC:
             self._subscriber = rospy.Subscriber(self.name, self.message_class, self.message_callback)
-            self._publisher = rospy.Publisher(self.name, self.message_class, queue_size=1)
+            self._publisher = rospy.Publisher(self.name, self.message_class, latch = True, queue_size=1)
             rospy.loginfo("Created ROS INPUT Topic with name: " + str(self.name))
         else:
             if io_type==OUTPUT_TOPIC:
                 self._subscriber = rospy.Subscriber(self.name, self.message_class, self.message_callback)
-                self._publisher = rospy.Publisher(self.name, self.message_class, queue_size=1)
+                self._publisher = rospy.Publisher(self.name, self.message_class, latch = True, queue_size=1)
                 rospy.loginfo("Created ROS OUTPUT Topic with name: " + str(self.name))
             else:
                 rospy.loginfo("TOPIC is not Input or output: " + str(self.name))  
