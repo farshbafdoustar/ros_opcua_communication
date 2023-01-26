@@ -55,11 +55,11 @@ class OpcUaROSTopic:
         self._recursive_create_items(self.parent, idx, topic_name, topic_type, self.message_instance, True)
         if io_type==INPUT_TOPIC:
             self._subscriber = rospy.Subscriber(self.name, self.message_class, self.message_callback)
-            # self._publisher = rospy.Publisher(self.name, self.message_class, latch = True, queue_size=1)
+            self._publisher = rospy.Publisher(self.name, self.message_class, latch = True, queue_size=1)
             rospy.loginfo("Created ROS INPUT Topic with name: " + str(self.name))
         else:
             if io_type==OUTPUT_TOPIC:
-                # self._subscriber = rospy.Subscriber(self.name, self.message_class, self.message_callback)
+                self._subscriber = rospy.Subscriber(self.name, self.message_class, self.message_callback)
                 self._publisher = rospy.Publisher(self.name, self.message_class, latch = True, queue_size=1)
                 rospy.loginfo("Created ROS OUTPUT Topic with name: " + str(self.name))
             else:
@@ -273,25 +273,22 @@ def correct_type(node, typemessage):
             result = numpy.double(result)
         if typemessage.__name__ == "byte":
             result = numpy.byte(result)
-        if typemessage.__name__ == "int":
-            result = int(result) & 0xff
-            print(result + 'res')
     else:
         rospy.logerr("Can't Convert: " + str(node.get_data_value.Value))
         return None
     
-    newnode = node.nodeid.to_string()
-    resultstr = str(result)
-    if newnode.find('name') != -1:
-        if resultstr.find(',') != -1:
-            result = result.split(',')
-        else:
-            result = [result]
-    if newnode.find('value') != -1:
-        if resultstr.find(',') != -1:
-            result = result
-        else:
-            result = [result]
+    # newnode = node.nodeid.to_string()
+    # resultstr = str(result)
+    # if newnode.find('name') != -1:
+    #     if resultstr.find(',') != -1:
+    #         result = result.split(',')
+    #     else:
+    #         result = [result]
+    # if newnode.find('value') != -1:
+    #     if resultstr.find(',') != -1:
+    #         result = result
+    #     else:
+    #         result = [result]
     return result
 
 def _extract_array_info_python(type_python):
