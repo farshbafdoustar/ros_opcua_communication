@@ -54,8 +54,8 @@ class ROSServer:
         self.server.set_server_name("ROS OPCUA Server")
         self.server.start()
         self.method_map = None
-        self.INPUT_TOPIC="INPUT"
-        self.OUTPUT_TOPIC="OUTPUT"
+        # self.INPUT_TOPIC="INPUT"
+        # self.OUTPUT_TOPIC="OUTPUT"
         # setup our own namespaces, this is expected
         uri_topics = "http://ros.org/topics"
         # two different namespaces to make getting the correct node easier for get_node (otherwise had object for service and topic with same name
@@ -82,8 +82,8 @@ class ROSServer:
                                                                 idx_topics, idx_actions, topics_object, actions_object, all_topics_lst)
         # hh
         for key in self.method_map:
-            for topic_name, topic_type, io_type in all_topics_lst:
-                if io_type==self.OUTPUT_TOPIC and topic_name in key:
+            for topic_name in all_topics_lst:
+                if topic_name in key:
                     leaf_node = self.server.get_node(key)
                     sub_lst.append(leaf_node)                 
         try:

@@ -25,13 +25,12 @@ from control_msgs.msg import *
 
 
 class OpcUaROSTopic:
-    def __init__(self, server, parent, idx, topic_name, topic_type,io_type):
-        INPUT_TOPIC="INPUT"
-        OUTPUT_TOPIC="OUTPUT"
+    def __init__(self, server, parent, idx, topic_name, topic_type):
+        # INPUT_TOPIC="INPUT"
+        # OUTPUT_TOPIC="OUTPUT"
         self.server = server
         self.parent = self.recursive_create_objects(topic_name, idx, parent)
         self.type_name = topic_type
-        self.io_type = io_type
         self.name = topic_name
         self._nodes = {}
         self.idx = idx
@@ -53,18 +52,10 @@ class OpcUaROSTopic:
         
 
         self._recursive_create_items(self.parent, idx, topic_name, topic_type, self.message_instance, True)
-        if io_type==INPUT_TOPIC:
-            self._subscriber = rospy.Subscriber(self.name, self.message_class, self.message_callback)
-            self._publisher = rospy.Publisher(self.name, self.message_class, latch = True, queue_size=1)
-            rospy.loginfo("Created ROS INPUT Topic with name: " + str(self.name))
-        else:
-            if io_type==OUTPUT_TOPIC:
-                self._subscriber = rospy.Subscriber(self.name, self.message_class, self.message_callback)
-                self._publisher = rospy.Publisher(self.name, self.message_class, latch = True, queue_size=1)
-                rospy.loginfo("Created ROS OUTPUT Topic with name: " + str(self.name))
-            else:
-                rospy.loginfo("TOPIC is not Input or output: " + str(self.name))  
-        
+        self._subscriber = rospy.Subscriber(self.name, self.message_class, self.message_callback)
+        self._publisher = rospy.Publisher(self.name, self.message_class, queue_size=1)
+        rospy.loginfo("Created ROS INPUT Topic with name: " + str(self.name))
+       
         
         #self.opcua_update_callback(self.parent)
 
@@ -431,7 +422,7 @@ def refresh_topics_and_actions(namespace_ros, server, topicsdict, actionsdict, i
 
     rospy.logdebug(str(ros_topics))
     rospy.logdebug(str(rospy.get_published_topics('/move_base_simple')))
-    for topic_name, topic_type, io_type in ros_topics:
+    for topic_name, topic_type in ros_topics:
         if topic_name not in topicsdict or topicsdict[topic_name] is None:
             splits = topic_name.split('/')
             if "cancel" in splits[-1] and "result" in splits[-1] and "feedback" in splits[-1] and "goal" in splits[-1] and "status" in splits[-1]:
@@ -453,7 +444,7 @@ def refresh_topics_and_actions(namespace_ros, server, topicsdict, actionsdict, i
                 pass       
             else:
                 # rospy.loginfo("Ignoring normal topics for debugging...")
-                topic = OpcUaROSTopic(server, topics, idx_topics, topic_name, topic_type,io_type)
+                topic = OpcUaROSTopic(server, topics, idx_topics, topic_name, topic_type)
                 topicsdict[topic_name] = topic
                 
                 all_child_to_method_maps = merge_two_dicts(all_child_to_method_maps, topic.child_to_update_method_map)
