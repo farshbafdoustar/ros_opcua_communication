@@ -129,12 +129,12 @@ class ROSServer:
         return None
 
     def find_topics_node_with_same_name(self, name, idx):
-        print("Reached TopicCheck for name " + name)
+        # print("Reached TopicCheck for name " + name)
         for topic in self.topicsDict:
-            print(
-                "Found name: " + str(self.topicsDict[topic].parent.nodeid.Identifier))
+            # print(
+            #     "Found name: " + str(self.topicsDict[topic].parent.nodeid.Identifier))
             if self.topicsDict[topic].parent.nodeid.Identifier == name:
-                print("Found match for name: " + name)
+                # print("Found match for name: " + name)
                 return self.topicsDict[topic].parent
         return None
 

@@ -123,7 +123,7 @@ class OpcUaROSTopic:
 
     @uamethod
     def opcua_update_callback(self, parent):
-        print("!!!OPC-UA Object Change Callback :: ROS Publisher is Called!!!")
+        # print("!!!OPC-UA Object Change Callback :: ROS Publisher is Called!!!")
         if self._publisher is not None:
             try:
                 for nodeName in self._nodes:
