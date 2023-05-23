@@ -82,7 +82,7 @@ class ROSServer:
                                                                 idx_topics, idx_actions, topics_object, actions_object, all_topics_lst)
         # hh
         for key in self.method_map:
-            for topic_name in all_topics_lst:
+            for topic_name, topic_type in all_topics_lst:
                 if topic_name in key:
                     leaf_node = self.server.get_node(key)
                     sub_lst.append(leaf_node)                 
