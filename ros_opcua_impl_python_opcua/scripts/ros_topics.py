@@ -54,7 +54,7 @@ class OpcUaROSTopic:
         self._recursive_create_items(self.parent, idx, topic_name, topic_type, self.message_instance, True)
         self._subscriber = rospy.Subscriber(self.name, self.message_class, self.message_callback)
         self._publisher = rospy.Publisher(self.name, self.message_class, latch = True, queue_size=1)
-        rospy.loginfo("Created ROS Topic with name: " + str(self.name))
+        rospy.loginfo("Created ROS Topic: " + str(self.name))
        
         
         #self.opcua_update_callback(self.parent)
@@ -134,7 +134,7 @@ class OpcUaROSTopic:
                             setattr(self.message_instance, name, correct_type(child, type(getattr(self.message_instance, name))))
                         if child.get_node_class == ua.NodeClass.Object:
                             setattr(self.message_instance, name, self.create_message_instance(child))
-                print("ROS Message:", self.message_instance)
+                rospy.loginfo("OPC-UA object change callback:", self.message_instance)
                 self._publisher.publish(self.message_instance)
 
             except:
@@ -143,7 +143,7 @@ class OpcUaROSTopic:
         else:
             print('OPC-UA object changed but no publisher available for:', self.name, self.message_instance)
                
-        print("OPC-UA object change callback finished.")
+        # print("OPC-UA object change callback finished.")
 
 
 # TODO: Update_Value cant extract topic info of the following topic: 
