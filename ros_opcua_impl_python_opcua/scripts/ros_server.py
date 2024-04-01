@@ -1,15 +1,17 @@
 #!/usr/bin/env python
+import ast
+import os
 import sys
 import time
-import ast
+
 
 import rosgraph
 import rosnode
 import rospy
-from opcua import Server, ua
-
 import ros_services
 import ros_topics
+
+from opcua import Server, ua
 
 from io_controllers_msgs.msg import *
 from control_msgs.msg import *
@@ -48,9 +50,10 @@ class ROSServer:
         rospy.init_node("rosopcua")
         self.server = Server()
         # self.server.set_endpoint("opc.tcp://192.168.1.100:21554/")
+        server_uri=os.environ['OPCUA_SERVER_URI']
         with open('/data/workcell_smp_irb2600/config/vetron_opcua_server.txt', 'r') as txt:
             txtfile = txt.read()
-        self.server.set_endpoint(txtfile)
+        self.server.set_endpoint(server_uri)
         self.server.set_server_name("ROS OPCUA Server")
         self.server.start()
         self.method_map = None
