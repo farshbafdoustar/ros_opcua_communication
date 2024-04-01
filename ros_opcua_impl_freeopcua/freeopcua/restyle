@@ -1,4 +1,0 @@
-#! /bin/bash
-
-astyle --options=astylerc  `find . -regextype posix-extended -regex ".*\.(c|cpp|h|hpp)"`
-

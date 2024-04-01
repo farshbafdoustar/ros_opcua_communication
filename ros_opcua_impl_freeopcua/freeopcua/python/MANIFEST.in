@@ -1,3 +1,0 @@
-include ChangeLog MANIFEST.in README setup.py
-recursive-include src *
-
