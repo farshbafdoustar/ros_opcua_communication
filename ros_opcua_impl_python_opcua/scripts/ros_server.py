@@ -43,7 +43,7 @@ def own_rosnode_cleanup():
 
 class ROSServer:
     def __init__(self):
-        self.namespace_ros = rospy.get_param("/rosopcua/namespace")
+        self.namespace_ros = os.environ['ROBOT_NAME']
         self.topicsDict = {}
         self.servicesDict = {}
         self.actionsDict = {}
@@ -51,8 +51,6 @@ class ROSServer:
         self.server = Server()
         # self.server.set_endpoint("opc.tcp://192.168.1.100:21554/")
         server_uri=os.environ['OPCUA_SERVER_URI']
-        with open('/data/workcell_smp_irb2600/config/vetron_opcua_server.txt', 'r') as txt:
-            txtfile = txt.read()
         self.server.set_endpoint(server_uri)
         self.server.set_server_name("ROS OPCUA Server")
         self.server.start()
@@ -108,7 +106,7 @@ class ROSServer:
  
     def get_all_topics(self):
         # function to provide topics
-        ros_topics = rospy.get_param("/rosopcua/topics_glob")
+        ros_topics = rospy.get_param("~topics_glob")
         all_ros_topics = ast.literal_eval(ros_topics)
 
         return all_ros_topics
