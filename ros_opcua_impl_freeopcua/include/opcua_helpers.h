@@ -42,9 +42,9 @@ std::map<int, std::string> _TypeToStringMap = {
     {10, "float32"},
     {11, "float64"},
     {12, "string"},
-//     {13, "date_time"},
+    {13, "date_time"},
 //     {14, "guid"},
-//     {15, "byte_string"},
+    {15, "byte_string"},
 //     {16, "xml_element"},
 //     {17, "id"},
 //     {18, "expanded_node_id"},
@@ -140,8 +140,9 @@ std::map<int, std::string> _TypeToStringMap = {
 ros_opcua_msgs::TypeValue convertVariantToTypeValue(const OpcUa::Variant& variant) {
     
     ros_opcua_msgs::TypeValue typeValue;
-    
+    ROS_WARN_STREAM("variant type is :"<< (int)variant.Type());
     typeValue.type = _TypeToStringMap[(int)variant.Type()];
+    ROS_WARN_STREAM("variant type str is :"<< typeValue.type);
     
     if (typeValue.type == "bool") {
         typeValue.bool_d = (bool)variant;
@@ -179,7 +180,12 @@ ros_opcua_msgs::TypeValue convertVariantToTypeValue(const OpcUa::Variant& varian
     else if (typeValue.type == "string") {
         typeValue.string_d = std::string(variant);
     }
+    else if (typeValue.type == "byte_string") {
+        std::vector<uint8_t> byte_string=((OpcUa::ByteString)variant).Data;
+        typeValue.string_d = std::string(byte_string.begin(),byte_string.end());
+    }
     else {
+        ROS_WARN_STREAM("type value type is unknown:"<<typeValue.type);
         typeValue.type = "Unknown";
     }
     

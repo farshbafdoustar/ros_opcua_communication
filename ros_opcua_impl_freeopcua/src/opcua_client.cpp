@@ -251,7 +251,7 @@ bool read(ros_opcua_srvs::Read::Request &req, ros_opcua_srvs::Read::Response &re
         if (res.data.type == "Unknown") {
             res.success = false;
             char err_string[100];
-            sprintf(err_string, "Unknon data type!!");
+            sprintf(err_string, "Unknown data type!!");
             res.error_message = err_string;
             ROS_DEBUG("Reading failed!");
         }
