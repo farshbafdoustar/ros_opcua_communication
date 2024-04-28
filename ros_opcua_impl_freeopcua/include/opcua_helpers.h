@@ -140,9 +140,7 @@ std::map<int, std::string> _TypeToStringMap = {
 ros_opcua_msgs::TypeValue convertVariantToTypeValue(const OpcUa::Variant& variant) {
     
     ros_opcua_msgs::TypeValue typeValue;
-    ROS_WARN_STREAM("variant type is :"<< (int)variant.Type());
     typeValue.type = _TypeToStringMap[(int)variant.Type()];
-    ROS_WARN_STREAM("variant type str is :"<< typeValue.type);
     
     if (typeValue.type == "bool") {
         typeValue.bool_d = (bool)variant;
@@ -185,7 +183,6 @@ ros_opcua_msgs::TypeValue convertVariantToTypeValue(const OpcUa::Variant& varian
         typeValue.string_d = std::string(byte_string.begin(),byte_string.end());
     }
     else {
-        ROS_WARN_STREAM("type value type is unknown:"<<typeValue.type);
         typeValue.type = "Unknown";
     }
     
