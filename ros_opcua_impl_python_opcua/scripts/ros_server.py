@@ -1,30 +1,23 @@
 #!/usr/bin/env python
-from multiprocessing.connection import Client
-from pydoc import cli
-from pydoc_data.topics import topics
 import sys
-import this
 import time
-from webbrowser import get
+import ast
 
 import rosgraph
 import rosnode
 import rospy
 from opcua import Server, ua
 
-
 import ros_services
 import ros_topics
 
-
-from std_msgs.msg import *
+from io_controllers_msgs.msg import *
 from control_msgs.msg import *
 from trajectory_msgs import *
-
-#client = ros_client.ROSClient("opc.tcp://0.0.0.0:21554/")
+from std_msgs.msg import *
 
 # Returns the hierachy as one string from the first remaining part on.
-
+sub_lst = []
 
 def nextname(hierachy, index_of_last_processed):
     try:
@@ -38,16 +31,15 @@ def nextname(hierachy, index_of_last_processed):
         rospy.logerr("Error encountered ", e)
 
 
-# def own_rosnode_cleanup():
-#     pinged, unpinged = rosnode.rosnode_ping_all()
-#     if unpinged:
-#         master = rosgraph.Master(rosnode.ID)
-#         # noinspection PyTypeChecker
-#         rosnode.cleanup_master_blacklist(master, unpinged)
+def own_rosnode_cleanup():
+    pinged, unpinged = rosnode.rosnode_ping_all()
+    if unpinged:
+        master = rosgraph.Master(rosnode.ID)
+        # noinspection PyTypeChecker
+        rosnode.cleanup_master_blacklist(master, unpinged)
 
 
 class ROSServer:
-    
     def __init__(self):
         self.namespace_ros = rospy.get_param("/rosopcua/namespace")
         self.topicsDict = {}
@@ -55,67 +47,52 @@ class ROSServer:
         self.actionsDict = {}
         rospy.init_node("rosopcua")
         self.server = Server()
-        self.server.set_endpoint("opc.tcp://0.0.0.0:21554/")
-        self.server.set_server_name("ROS ua Server")
+        # self.server.set_endpoint("opc.tcp://192.168.1.100:21554/")
+        with open('/data/workcell_smp_irb2600/config/vetron_opcua_server.txt', 'r') as txt:
+            txtfile = txt.read()
+        self.server.set_endpoint(txtfile)
+        self.server.set_server_name("ROS OPCUA Server")
         self.server.start()
-
         self.method_map = None
-        self.INPUT_TOPIC="INPUT"
-        self.OUTPUT_TOPIC="OUTPUT"
-
+        # self.INPUT_TOPIC="INPUT"
+        # self.OUTPUT_TOPIC="OUTPUT"
         # setup our own namespaces, this is expected
         uri_topics = "http://ros.org/topics"
         # two different namespaces to make getting the correct node easier for get_node (otherwise had object for service and topic with same name
-        #uri_services = "http://ros.org/services"
+        uri_services = "http://ros.org/services"
         uri_actions = "http://ros.org/actions"
         idx_topics = self.server.register_namespace(uri_topics)
-        #idx_services = self.server.register_namespace(uri_services)
+        idx_services = self.server.register_namespace(uri_services)
         idx_actions = self.server.register_namespace(uri_actions)
         # get Objects node, this is where we should put our custom stuff
         objects = self.server.get_objects_node()
 
         # one object per type we are watching
         topics_object = objects.add_object(idx_topics, "ROS-Topics")
-        #services_object = objects.add_object(idx_services, "ROS-Services")
+        services_object = objects.add_object(idx_services, "ROS-Services")
         actions_object = objects.add_object(idx_actions, "ROS_Actions")
-
-        # hh
-        # self.client = Client("opc.tcp://0.0.0.0:21554/",timeout=10)
-        # self.client.connect()
-        # print("client conected")
 
         # while not rospy.is_shutdown():
 
         all_topics_lst = self.get_all_topics()
 
         # ros_topics starts a lot of publisher/subscribers, might slow everything down quite a bit.
-        # ros_services.refresh_services(self.namespace_ros, self, self.servicesDict, idx_services, services_object)
+        ros_services.refresh_services(self.namespace_ros, self, self.servicesDict, idx_services, services_object)
         self.method_map = ros_topics.refresh_topics_and_actions(self.namespace_ros, self, self.topicsDict, self.actionsDict,
                                                                 idx_topics, idx_actions, topics_object, actions_object, all_topics_lst)
         # hh
-
-        sub_lst = []
         for key in self.method_map:
-            for topic_name, topic_type,io_type in all_topics_lst:
-                if io_type==self.OUTPUT_TOPIC and topic_name in key:
+            for topic_name, topic_type in all_topics_lst:
+                if topic_name in key:
                     leaf_node = self.server.get_node(key)
-                    sub_lst.append(leaf_node)
-
-            # if(key.find("/header") != -1 or key.find("time") != -1):
-            #     del self.method_map[key]
-            #     continue
-            
-            
+                    sub_lst.append(leaf_node)                 
         try:
-            
             sub = self.server.create_subscription(period=1, handler=self)
             handle = sub.subscribe_data_change(sub_lst)
-        except:
-            print("Can not create_subscription for this object:",key)
-            
-            #print(sub_lst)
 
-        #print(self.method_map)
+        except:
+            print("Can not create_subscription for this object:", key)
+
         print("ROS OPCUA Server initialized.")
         while not rospy.is_shutdown():
             rospy.spin()
@@ -125,55 +102,39 @@ class ROSServer:
         self.server.stop()
         print("ROS OPCUA Server stopped.")
         quit()
-        
-        
-
+ 
     def get_all_topics(self):
         # function to provide topics
-       
-        all_ros_topics = []
-        all_ros_topics.append(['/teststation/controller/activate_cutter/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/activate_thread_clamp/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/open_head/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
-        all_ros_topics.append(['/teststation/controller/unlock_tool_changer/command', 'std_msgs/Bool',self.OUTPUT_TOPIC])
-
-        all_ros_topics.append(['/teststation/controller/is_cutter_activated/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_cutter_deactivated/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_head_close/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_head_open/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_needle_cutting/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_needle_top/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_toolchanger_locked/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
-        # all_ros_topics.append(['/teststation/controller/is_toolchanger_unlocked/state', 'std_msgs/ByteMultiArray',self.INPUT_TOPIC])
+        ros_topics = rospy.get_param("/rosopcua/topics_glob")
+        all_ros_topics = ast.literal_eval(ros_topics)
 
         return all_ros_topics
 
     # cb
 
     def datachange_notification(self, node, val, data):
-        nodeid_str = node.nodeid.to_string()
-        method_str = self.method_map[nodeid_str]
+        str = node.nodeid.to_string()
+        method_str = self.method_map[str]
         method = self.server.get_node(method_str)
-        node.call_method(method)
+        node.call_method(method)   
 
-    # def find_service_node_with_same_name(self, name, idx):
-    #     print("Reached ServiceCheck for name " + name)
-    #     for service in self.servicesDict:
-    #         print(
-    #             "Found name: " + str(self.servicesDict[service].parent.nodeid.Identifier))
-    #         if self.servicesDict[service].parent.nodeid.Identifier == name:
-    #             print("Found match for name: " + name)
-    #             return self.servicesDict[service].parent
-    #     return None
+    def find_service_node_with_same_name(self, name, idx):
+        print("Reached ServiceCheck for name " + name)
+        for service in self.servicesDict:
+            print(
+                "Found name: " + str(self.servicesDict[service].parent.nodeid.Identifier))
+            if self.servicesDict[service].parent.nodeid.Identifier == name:
+                print("Found match for name: " + name)
+                return self.servicesDict[service].parent
+        return None
 
     def find_topics_node_with_same_name(self, name, idx):
-        
-        print("Reached TopicCheck for name " + name)
+        # print("Reached TopicCheck for name " + name)
         for topic in self.topicsDict:
-            print(
-                "Found name: " + str(self.topicsDict[topic].parent.nodeid.Identifier))
+            # print(
+            #     "Found name: " + str(self.topicsDict[topic].parent.nodeid.Identifier))
             if self.topicsDict[topic].parent.nodeid.Identifier == name:
-                print("Found match for name: " + name)
+                # print("Found match for name: " + name)
                 return self.topicsDict[topic].parent
         return None
 
